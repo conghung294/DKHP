@@ -31,6 +31,12 @@ namespace WindowsFormsApp1.Forms
             this.btnEnterGrades = new System.Windows.Forms.Button();
             this.btnSchedule = new System.Windows.Forms.Button();
             this.btnLogout = new System.Windows.Forms.Button();
+            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvMyCourses)).BeginInit();
             this.SuspendLayout();
             // 
@@ -40,7 +46,7 @@ namespace WindowsFormsApp1.Forms
             this.lblWelcome.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblWelcome.Location = new System.Drawing.Point(20, 20);
             this.lblWelcome.Name = "lblWelcome";
-            this.lblWelcome.Size = new System.Drawing.Size(120, 29);
+            this.lblWelcome.Size = new System.Drawing.Size(115, 29);
             this.lblWelcome.TabIndex = 0;
             this.lblWelcome.Text = "Xin chào";
             // 
@@ -53,6 +59,7 @@ namespace WindowsFormsApp1.Forms
             this.txtInstructorInfo.ReadOnly = true;
             this.txtInstructorInfo.Size = new System.Drawing.Size(350, 120);
             this.txtInstructorInfo.TabIndex = 1;
+            this.txtInstructorInfo.TextChanged += new System.EventHandler(this.txtInstructorInfo_TextChanged);
             // 
             // lblMyCourses
             // 
@@ -60,7 +67,7 @@ namespace WindowsFormsApp1.Forms
             this.lblMyCourses.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblMyCourses.Location = new System.Drawing.Point(20, 200);
             this.lblMyCourses.Name = "lblMyCourses";
-            this.lblMyCourses.Size = new System.Drawing.Size(230, 25);
+            this.lblMyCourses.Size = new System.Drawing.Size(247, 25);
             this.lblMyCourses.TabIndex = 2;
             this.lblMyCourses.Text = "Các lớp đang giảng dạy:";
             // 
@@ -69,6 +76,13 @@ namespace WindowsFormsApp1.Forms
             this.dgvMyCourses.AllowUserToAddRows = false;
             this.dgvMyCourses.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvMyCourses.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvMyCourses.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.dataGridViewTextBoxColumn1,
+            this.dataGridViewTextBoxColumn2,
+            this.dataGridViewTextBoxColumn3,
+            this.dataGridViewTextBoxColumn4,
+            this.dataGridViewTextBoxColumn5,
+            this.dataGridViewTextBoxColumn6});
             this.dgvMyCourses.Location = new System.Drawing.Point(20, 240);
             this.dgvMyCourses.Name = "dgvMyCourses";
             this.dgvMyCourses.ReadOnly = true;
@@ -76,12 +90,6 @@ namespace WindowsFormsApp1.Forms
             this.dgvMyCourses.RowTemplate.Height = 24;
             this.dgvMyCourses.Size = new System.Drawing.Size(1200, 400);
             this.dgvMyCourses.TabIndex = 3;
-            this.dgvMyCourses.Columns.Add("MaLHP", "Mã lớp HP");
-            this.dgvMyCourses.Columns.Add("TenHP", "Tên học phần");
-            this.dgvMyCourses.Columns.Add("TenLop", "Lớp");
-            this.dgvMyCourses.Columns.Add("LichHoc", "Lịch học");
-            this.dgvMyCourses.Columns.Add("LoaiMon", "Loại môn");
-            this.dgvMyCourses.Columns.Add("SiSo", "Sĩ số");
             // 
             // btnViewStudents
             // 
@@ -134,6 +142,48 @@ namespace WindowsFormsApp1.Forms
             this.btnLogout.UseVisualStyleBackColor = false;
             this.btnLogout.Click += new System.EventHandler(this.btnLogout_Click);
             // 
+            // dataGridViewTextBoxColumn1
+            // 
+            this.dataGridViewTextBoxColumn1.HeaderText = "Mã lớp HP";
+            this.dataGridViewTextBoxColumn1.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            this.dataGridViewTextBoxColumn1.ReadOnly = true;
+            // 
+            // dataGridViewTextBoxColumn2
+            // 
+            this.dataGridViewTextBoxColumn2.HeaderText = "Tên học phần";
+            this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            this.dataGridViewTextBoxColumn2.ReadOnly = true;
+            // 
+            // dataGridViewTextBoxColumn3
+            // 
+            this.dataGridViewTextBoxColumn3.HeaderText = "Lớp";
+            this.dataGridViewTextBoxColumn3.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            this.dataGridViewTextBoxColumn3.ReadOnly = true;
+            // 
+            // dataGridViewTextBoxColumn4
+            // 
+            this.dataGridViewTextBoxColumn4.HeaderText = "Lịch học";
+            this.dataGridViewTextBoxColumn4.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
+            this.dataGridViewTextBoxColumn4.ReadOnly = true;
+            // 
+            // dataGridViewTextBoxColumn5
+            // 
+            this.dataGridViewTextBoxColumn5.HeaderText = "Loại môn";
+            this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
+            this.dataGridViewTextBoxColumn5.ReadOnly = true;
+            // 
+            // dataGridViewTextBoxColumn6
+            // 
+            this.dataGridViewTextBoxColumn6.HeaderText = "Sĩ số";
+            this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
+            this.dataGridViewTextBoxColumn6.ReadOnly = true;
+            // 
             // InstructorMainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -152,10 +202,19 @@ namespace WindowsFormsApp1.Forms
             this.Name = "InstructorMainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Giảng viên - Quản lý lớp học";
+            this.Load += new System.EventHandler(this.InstructorMainForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvMyCourses)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
+
         }
+
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn6;
     }
 }
 

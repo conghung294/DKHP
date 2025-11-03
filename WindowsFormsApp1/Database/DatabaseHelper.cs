@@ -353,8 +353,8 @@ namespace WindowsFormsApp1.Database
                     connection.Open();
                     string sql = @"
                         SELECT l.MaLHP, l.TenLop, l.MaHP, l.MaGV, l.SiSo, l.LichHoc,
-                               m.TenHocPhan, g.TenGV,
-                               (SELECT COUNT(*) FROM DangKi d WHERE d.MaLHP = l.MaLHP) as SoLuongDangKy
+                               m.TenHocPhan, g.TenGV, d.HinhThuc,
+                               (SELECT COUNT(*) FROM DangKi d2 WHERE d2.MaLHP = l.MaLHP) as SoLuongDangKy
                         FROM LopHocPhan l
                         JOIN MonHoc m ON l.MaHP = m.MaMH
                         JOIN GiangVien g ON l.MaGV = g.MaGV
@@ -378,7 +378,8 @@ namespace WindowsFormsApp1.Database
                                     LichHoc = reader["LichHoc"]?.ToString(),
                                     SoLuongDangKy = Convert.ToInt32(reader["SoLuongDangKy"]),
                                     TenHocPhan = reader["TenHocPhan"].ToString(),
-                                    TenGiangVien = reader["TenGV"].ToString()
+                                    TenGiangVien = reader["TenGV"].ToString(),
+                                    HinhThuc = reader["HinhThuc"]?.ToString() ?? "Kế hoạch"
                                 });
                             }
                         }

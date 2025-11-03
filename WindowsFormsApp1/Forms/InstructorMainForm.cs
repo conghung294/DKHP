@@ -360,6 +360,16 @@ namespace WindowsFormsApp1.Forms
             }
             this.Close();
         }
+
+        private void InstructorMainForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtInstructorInfo_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }
 

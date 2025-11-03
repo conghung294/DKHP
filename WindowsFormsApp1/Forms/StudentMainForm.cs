@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using System.IO;
 using WindowsFormsApp1.Database;
 using WindowsFormsApp1.Models;
 using WindowsFormsApp1.UI;
@@ -93,6 +94,27 @@ namespace WindowsFormsApp1.Forms
             lblUserInfo.Location = new Point(5, 5);
             lblUserInfo.TextAlign = ContentAlignment.TopLeft;
             lblUserInfo.Padding = new Padding(0);
+            
+            // Thêm logo thay cho dòng "Xin chào"
+            try
+            {
+                var logoPath = ResolveLogoPath();
+                if (!string.IsNullOrEmpty(logoPath) && File.Exists(logoPath))
+                {
+                    PictureBox picLogo = new PictureBox();
+                    picLogo.Size = new Size(64, 64);
+                    picLogo.Location = new Point(5, 5);
+                    picLogo.SizeMode = PictureBoxSizeMode.Zoom;
+                    using (var fs = new FileStream(logoPath, FileMode.Open, FileAccess.Read))
+                    {
+                        picLogo.Image = Image.FromStream(fs);
+                    }
+                    userInfoPanel.Controls.Add(picLogo);
+                    // Ẩn label "Xin chào"
+                    lblUserInfo.Visible = false;
+                }
+            }
+            catch { /* Bỏ qua, fallback về label */ }
             
             userInfoPanel.Controls.Add(lblUserInfo);
             
@@ -317,6 +339,42 @@ namespace WindowsFormsApp1.Forms
             
             // Xử lý resize TabControl
             tabControl.Resize += TabControl_Resize;
+        }
+        
+        // Cố gắng tìm logo ở nhiều vị trí thường gặp
+        private string ResolveLogoPath()
+        {
+            // Danh sách tên/đuôi có thể
+            var candidateNames = new[] { "neu.png", "logo.png", "neu.jpg", "logo.jpg", "neu.ico", "logo.ico" };
+            
+            // 1) bin/Debug|Release/Resources
+            var startup = Application.StartupPath;
+            foreach (var name in candidateNames)
+            {
+                var p = Path.Combine(startup, "Resources", name);
+                if (File.Exists(p)) return p;
+            }
+            
+            // 2) Thư mục dự án (2 cấp lên từ bin): projectRoot/Resources
+            try
+            {
+                var projectRoot = Path.GetFullPath(Path.Combine(startup, "..", ".."));
+                foreach (var name in candidateNames)
+                {
+                    var p = Path.Combine(projectRoot, "Resources", name);
+                    if (File.Exists(p)) return p;
+                }
+            }
+            catch { }
+            
+            // 3) Cùng thư mục chạy
+            foreach (var name in candidateNames)
+            {
+                var p = Path.Combine(startup, name);
+                if (File.Exists(p)) return p;
+            }
+            
+            return string.Empty;
         }
         
         private void UpdateContentPanelLayout()
@@ -765,7 +823,7 @@ namespace WindowsFormsApp1.Forms
                     section.TenHocPhan,
                     section.TenLop,
                     section.LichHoc,
-                    "", // LoaiMonHoc không có trong schema mới
+                    section.HinhThuc ?? "Kế hoạch", // Hình thức đăng ký: "Kế hoạch" hoặc "Học vượt"
                     $"{section.SoLuongDangKy}/{section.SiSo}"
                 );
             }
