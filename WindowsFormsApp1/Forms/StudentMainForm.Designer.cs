@@ -226,8 +226,9 @@ namespace WindowsFormsApp1.Forms
             this.Controls.Add(this.tabControl);
             this.Controls.Add(this.txtStudentInfo);
             this.Controls.Add(this.lblWelcome);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
+            this.MaximizeBox = true;
+            this.MinimizeBox = true;
             this.Name = "StudentMainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Sinh viên - Đăng ký học phần";

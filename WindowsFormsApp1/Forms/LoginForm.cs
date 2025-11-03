@@ -1,6 +1,8 @@
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 using WindowsFormsApp1.Database;
+using WindowsFormsApp1.UI;
 
 namespace WindowsFormsApp1.Forms
 {
@@ -9,8 +11,40 @@ namespace WindowsFormsApp1.Forms
         public LoginForm()
         {
             InitializeComponent();
+            ApplyTheme();
             // Xử lý khi đóng form - chỉ thoát app nếu không còn form nào khác
             this.FormClosing += LoginForm_FormClosing;
+        }
+        
+        private void ApplyTheme()
+        {
+            // Style cho form
+            this.BackColor = ThemeHelper.BackgroundLight;
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+            
+            // Style cho title
+            lblTitle.Font = ThemeHelper.TitleFont;
+            lblTitle.ForeColor = ThemeHelper.PrimaryBlueDark;
+            
+            // Style cho labels
+            lblUsername.Font = ThemeHelper.LabelFont;
+            lblUsername.ForeColor = ThemeHelper.TextDark;
+            lblPassword.Font = ThemeHelper.LabelFont;
+            lblPassword.ForeColor = ThemeHelper.TextDark;
+            
+            // Style cho textboxes
+            txtUsername.BackColor = ThemeHelper.BackgroundWhite;
+            txtUsername.ForeColor = ThemeHelper.TextDark;
+            txtUsername.Font = ThemeHelper.NormalFont;
+            txtUsername.BorderStyle = BorderStyle.FixedSingle;
+            
+            txtPassword.BackColor = ThemeHelper.BackgroundWhite;
+            txtPassword.ForeColor = ThemeHelper.TextDark;
+            txtPassword.Font = ThemeHelper.NormalFont;
+            txtPassword.BorderStyle = BorderStyle.FixedSingle;
+            
+            // Style cho button
+            ThemeHelper.ApplyButtonStyle(btnLogin, ThemeHelper.PrimaryBlue, Color.White, 8);
         }
         
         private void LoginForm_FormClosing(object sender, FormClosingEventArgs e)

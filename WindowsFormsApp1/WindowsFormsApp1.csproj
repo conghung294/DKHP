@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Database\DatabaseHelper.cs" />
+    <Compile Include="UI\ThemeHelper.cs" />
     <Compile Include="Forms\EnterGradesForm.cs">
       <SubType>Form</SubType>
     </Compile>
