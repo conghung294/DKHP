@@ -28,6 +28,10 @@ namespace WindowsFormsApp1.Forms
             currentInstructor = instructor;
             db = DatabaseHelper.Instance;
             
+            // Mở form ở chế độ toàn màn hình khi đăng nhập
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.WindowState = FormWindowState.Maximized;
+            
             // Xử lý khi đóng form bằng nút X
             this.FormClosing += InstructorMainForm_FormClosing;
             

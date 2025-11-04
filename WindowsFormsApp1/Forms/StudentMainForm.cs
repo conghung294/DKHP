@@ -22,6 +22,18 @@ namespace WindowsFormsApp1.Forms
         private Button btnHome;
         private Button btnCourses;
         private Label lblUserInfo;
+        
+        // Card thông tin sinh viên (UI đẹp hơn thay cho txtStudentInfo)
+        private Panel studentInfoCard;
+        private TableLayoutPanel tlpStudentInfo;
+        private Label lblValueMaSV;
+        private Label lblValueHoTen;
+        private Label lblValueCTDT;
+        private Label lblValueNgaySinh;
+        private Label lblValueGioiTinh;
+        private Label lblValueDiaChi;
+        private Label lblValueEmail;
+        private Label lblValueSDT;
 
         public StudentMainForm(Student student)
         {
@@ -35,6 +47,10 @@ namespace WindowsFormsApp1.Forms
             // Xử lý khi form thay đổi kích thước (resize, maximize, restore)
             this.ResizeEnd += StudentMainForm_ResizeEnd;
             this.Resize += StudentMainForm_Resize;
+            
+            // Mở form ở chế độ toàn màn hình
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.WindowState = FormWindowState.Maximized;
             
             // Tạo layout mới
             CreateModernLayout();
@@ -179,13 +195,75 @@ namespace WindowsFormsApp1.Forms
             // Điều chỉnh vị trí controls trong contentPanel (padding đã được set ở Panel level)
             // Vị trí tính từ padding của Panel (25px)
             lblWelcome.Location = new Point(0, 0);
-            txtStudentInfo.Location = new Point(0, 35);
-            txtStudentInfo.Size = new Size(400, 100);
+            // Ẩn textbox cũ, thay bằng card đẹp
+            txtStudentInfo.Visible = false;
+            
+            // Tạo card thông tin sinh viên
+            studentInfoCard = new Panel();
+            studentInfoCard.Parent = contentPanel;
+            studentInfoCard.Location = new Point(0, 35);
+            studentInfoCard.Size = new Size(700, 120);
+            studentInfoCard.BackColor = ThemeHelper.BackgroundWhite;
+            studentInfoCard.BorderStyle = BorderStyle.FixedSingle;
+            studentInfoCard.Padding = new Padding(12);
+            studentInfoCard.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            
+            tlpStudentInfo = new TableLayoutPanel();
+            tlpStudentInfo.Parent = studentInfoCard;
+            tlpStudentInfo.Dock = DockStyle.Fill;
+            // Bố cục 2 cột: (Tiêu đề1, Giá trị1, Tiêu đề2, Giá trị2)
+            tlpStudentInfo.ColumnCount = 4;
+            tlpStudentInfo.RowCount = 4;
+            tlpStudentInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 140));
+            tlpStudentInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tlpStudentInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 140));
+            tlpStudentInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            for (int i = 0; i < 4; i++) tlpStudentInfo.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            
+            // Hàm thêm cặp tiêu đề-giá trị vào vị trí (row, groupColumn)
+            // groupColumn: 0 cho cột trái, 1 cho cột phải
+            void AddPair(int row, int groupColumn, string title, out Label valueLabel)
+            {
+                int colTitle = groupColumn == 0 ? 0 : 2;
+                int colValue = colTitle + 1;
+                var lblTitle = new Label();
+                lblTitle.Text = title;
+                lblTitle.AutoSize = true;
+                lblTitle.Margin = new Padding(0, 2, 6, 2);
+                lblTitle.TextAlign = ContentAlignment.MiddleLeft;
+                lblTitle.Font = ThemeHelper.LabelFont;
+                lblTitle.ForeColor = ThemeHelper.TextDark;
+                
+                valueLabel = new Label();
+                valueLabel.AutoSize = true;
+                valueLabel.Margin = new Padding(0, 2, 0, 2);
+                valueLabel.TextAlign = ContentAlignment.MiddleLeft;
+                valueLabel.Font = ThemeHelper.NormalFont;
+                valueLabel.ForeColor = ThemeHelper.TextDark;
+                
+                tlpStudentInfo.Controls.Add(lblTitle, colTitle, row);
+                tlpStudentInfo.Controls.Add(valueLabel, colValue, row);
+            }
+            
+            // Cột trái
+            AddPair(0, 0, "Mã sinh viên:", out lblValueMaSV);
+            AddPair(1, 0, "Họ tên:", out lblValueHoTen);
+            AddPair(2, 0, "Chương trình:", out lblValueCTDT);
+            AddPair(3, 0, "Ngày sinh:", out lblValueNgaySinh);
+            // Cột phải
+            AddPair(0, 1, "Giới tính:", out lblValueGioiTinh);
+            AddPair(1, 1, "Địa chỉ:", out lblValueDiaChi);
+            AddPair(2, 1, "Email:", out lblValueEmail);
+            AddPair(3, 1, "SĐT:", out lblValueSDT);
             
             // TabControl - đảm bảo hiển thị rõ ràng và không bị che
             // Location tính từ contentPanel (đã có padding), không cần thêm padding
-            tabControl.Location = new Point(0, 140);
-            tabControl.Size = new Size(contentPanel.ClientSize.Width, contentPanel.ClientSize.Height - 200);
+            tabControl.Location = new Point(0, 190);
+            // Chừa chỗ cho vùng nút ở cuối
+            int buttonBarHeight = 60; // chiều cao khu vực nút
+            int bottomMargin = 20;    // lề dưới
+            int availableHeight = Math.Max(200, contentPanel.ClientSize.Height - tabControl.Location.Y - (buttonBarHeight + bottomMargin));
+            tabControl.Size = new Size(contentPanel.ClientSize.Width, availableHeight);
             tabControl.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             tabControl.Visible = true;
             tabControl.Enabled = true;
@@ -230,6 +308,9 @@ namespace WindowsFormsApp1.Forms
             btnCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             btnSchedule.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             btnLogout.Visible = false; // Ẩn button logout cũ, dùng button trong sidebar
+            btnRegister.Visible = true;
+            btnCancel.Visible = true;
+            btnSchedule.Visible = true;
             
             // Đảm bảo TabControl và DataGridViews visible và hiển thị đúng
             tabControl.Visible = true;
@@ -280,8 +361,11 @@ namespace WindowsFormsApp1.Forms
             lblWelcome.SendToBack();
             txtStudentInfo.SendToBack();
             
-            // TabControl phải ở trên cùng để không bị che
+            // Đảm bảo TabControl không che khu vực nút
             tabControl.BringToFront();
+            btnRegister.BringToFront();
+            btnCancel.BringToFront();
+            btnSchedule.BringToFront();
             
             // QUAN TRỌNG: Đảm bảo DataGridViews vẫn ở trong TabPages
             // Kiểm tra xem DataGridViews có đang trong TabPages không
@@ -404,12 +488,12 @@ namespace WindowsFormsApp1.Forms
             if (contentPanel != null && tabControl != null)
             {
                 // Update TabControl size khi form resize (dùng ClientSize để tính đúng)
-                // TabControl đã dùng Anchor nên sẽ tự động resize, nhưng cần đảm bảo Height
-                int tabControlHeight = Math.Max(200, contentPanel.ClientSize.Height - 200); // Để chỗ cho buttons
-                if (tabControl.Height != tabControlHeight)
-                {
-                    tabControl.Size = new Size(contentPanel.ClientSize.Width, tabControlHeight);
-                }
+                // Chừa vùng nút cuối màn hình
+                int buttonBarHeight = 60;
+                int bottomMargin = 20;
+                int tabTop = tabControl.Location.Y;
+                int tabControlHeight = Math.Max(200, contentPanel.ClientSize.Height - tabTop - (buttonBarHeight + bottomMargin));
+                tabControl.Size = new Size(contentPanel.ClientSize.Width, tabControlHeight);
                 
                 // Update button positions (buttons đã dùng Anchor nên sẽ tự động update)
                 if (btnRegister != null && contentPanel.ClientSize.Height > 60)
@@ -418,6 +502,11 @@ namespace WindowsFormsApp1.Forms
                     btnCancel.Location = new Point(160, contentPanel.ClientSize.Height - 60);
                     btnSchedule.Location = new Point(320, contentPanel.ClientSize.Height - 60);
                 }
+                
+                // Đảm bảo nút không bị che
+                btnRegister?.BringToFront();
+                btnCancel?.BringToFront();
+                btnSchedule?.BringToFront();
             }
         }
         
@@ -715,6 +804,12 @@ namespace WindowsFormsApp1.Forms
             lblWelcome.Font = ThemeHelper.SubHeaderFont;
             lblWelcome.ForeColor = ThemeHelper.TextDark;
             
+            // Style cho card thông tin
+            if (studentInfoCard != null)
+            {
+                studentInfoCard.BackColor = ThemeHelper.BackgroundWhite;
+            }
+            
             // Style cho textbox
             txtStudentInfo.BackColor = ThemeHelper.BackgroundWhite;
             txtStudentInfo.ForeColor = ThemeHelper.TextDark;
@@ -801,14 +896,30 @@ namespace WindowsFormsApp1.Forms
             // Load thông tin chương trình đào tạo từ database
             string tenCTDT = db.GetProgramName(currentStudent.MaCTDT);
             
-            txtStudentInfo.Text = $"Mã sinh viên: {currentStudent.MaSV}\r\n" +
-                                  $"Họ tên: {currentStudent.TenSV}\r\n" +
-                                  $"Chương trình: {tenCTDT}\r\n" +
-                                  $"Ngày sinh: {currentStudent.NgaySinh:dd/MM/yyyy}\r\n" +
-                                  $"Giới tính: {currentStudent.GioiTinh}\r\n" +
-                                  $"Địa chỉ: {currentStudent.DiaChi}\r\n" +
-                                  $"Email: {currentStudent.Email}\r\n" +
-                                  $"SĐT: {currentStudent.SDT}";
+            // Đổ dữ liệu vào card đẹp
+            if (lblValueMaSV != null)
+            {
+                lblValueMaSV.Text = currentStudent.MaSV;
+                lblValueHoTen.Text = currentStudent.TenSV;
+                lblValueCTDT.Text = tenCTDT;
+                lblValueNgaySinh.Text = currentStudent.NgaySinh.ToString("dd/MM/yyyy");
+                lblValueGioiTinh.Text = currentStudent.GioiTinh;
+                lblValueDiaChi.Text = currentStudent.DiaChi;
+                lblValueEmail.Text = currentStudent.Email;
+                lblValueSDT.Text = currentStudent.SDT;
+            }
+            else
+            {
+                // Fallback cho trường hợp card chưa khởi tạo
+                txtStudentInfo.Text = $"Mã sinh viên: {currentStudent.MaSV}\r\n" +
+                                      $"Họ tên: {currentStudent.TenSV}\r\n" +
+                                      $"Chương trình: {tenCTDT}\r\n" +
+                                      $"Ngày sinh: {currentStudent.NgaySinh:dd/MM/yyyy}\r\n" +
+                                      $"Giới tính: {currentStudent.GioiTinh}\r\n" +
+                                      $"Địa chỉ: {currentStudent.DiaChi}\r\n" +
+                                      $"Email: {currentStudent.Email}\r\n" +
+                                      $"SĐT: {currentStudent.SDT}";
+            }
         }
 
         private void LoadRegisteredCourses()

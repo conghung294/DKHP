@@ -45,6 +45,17 @@ namespace WindowsFormsApp1.Forms
             
             // Style cho button
             ThemeHelper.ApplyButtonStyle(btnLogin, ThemeHelper.PrimaryBlue, Color.White, 8);
+
+            // Ẩn dòng "Thông tin hệ thống"
+            try
+            {
+                if (lblInfo != null)
+                {
+                    lblInfo.Visible = false;
+                    lblInfo.Enabled = false;
+                }
+            }
+            catch { }
         }
         
         private void LoginForm_FormClosing(object sender, FormClosingEventArgs e)
