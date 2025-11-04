@@ -65,11 +65,20 @@
     <Compile Include="Forms\InstructorMainForm.Designer.cs">
       <DependentUpon>InstructorMainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\AdminMainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Forms\LoginForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\LoginForm.Designer.cs">
       <DependentUpon>LoginForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\AddEditStudentForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\AddEditInstructorForm.cs">
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\StudentMainForm.cs">
       <SubType>Form</SubType>

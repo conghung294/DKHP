@@ -245,6 +245,49 @@ namespace WindowsFormsApp1.Database
             return null;
         }
 
+        // Admin login: ưu tiên bảng Admin nếu có, fallback admin/admin
+        public bool LoginAdmin(string username, string password, out string adminName)
+        {
+            adminName = "";
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    // Thử truy vấn bảng Admin nếu tồn tại
+                    string checkTable = @"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Admin'";
+                    using (var cmdCheck = new SqlCommand(checkTable, connection))
+                    {
+                        int exists = Convert.ToInt32(cmdCheck.ExecuteScalar());
+                        if (exists > 0)
+                        {
+                            string sql = "SELECT TOP 1 HoTen FROM Admin WHERE MaAdmin = @U OR TenDangNhap = @U AND Password = @P";
+                            using (var cmd = new SqlCommand(sql, connection))
+                            {
+                                cmd.Parameters.AddWithValue("@U", username);
+                                cmd.Parameters.AddWithValue("@P", password);
+                                var result = cmd.ExecuteScalar();
+                                if (result != null)
+                                {
+                                    adminName = result.ToString();
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+
+            // Fallback tài khoản mặc định nếu không có bảng Admin
+            if (string.Equals(username, "admin", StringComparison.OrdinalIgnoreCase) && password == "admin")
+            {
+                adminName = "Quản trị viên";
+                return true;
+            }
+            return false;
+        }
+
         // Get courses by semester
         public List<Course> GetCoursesBySemester(int maHocKi)
         {
@@ -526,6 +569,247 @@ namespace WindowsFormsApp1.Database
                 MessageBox.Show($"Lỗi load dữ liệu: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             return sections;
+        }
+
+        // ===== ADMIN QUERIES =====
+        public List<Student> GetAllStudents()
+        {
+            var students = new List<Student>();
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = "SELECT MaSV, TenSV, NgaySinh, GioiTinh, SDT, Email, DiaChi, MaCTDT FROM SinhVien";
+                    using (var command = new SqlCommand(sql, connection))
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            students.Add(new Student
+                            {
+                                MaSV = reader["MaSV"].ToString(),
+                                TenSV = reader["TenSV"].ToString(),
+                                NgaySinh = Convert.ToDateTime(reader["NgaySinh"]),
+                                GioiTinh = reader["GioiTinh"]?.ToString(),
+                                SDT = reader["SDT"]?.ToString(),
+                                Email = reader["Email"]?.ToString(),
+                                DiaChi = reader["DiaChi"]?.ToString(),
+                                MaCTDT = reader["MaCTDT"].ToString()
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi tải Sinh viên: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            return students;
+        }
+
+        public List<Instructor> GetAllInstructors()
+        {
+            var instructors = new List<Instructor>();
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = "SELECT MaGV, TenGV, GioiTinh, DiaChi, Email, SDT, HocVi, MaKV FROM GiangVien";
+                    using (var command = new SqlCommand(sql, connection))
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            instructors.Add(new Instructor
+                            {
+                                MaGV = reader["MaGV"].ToString(),
+                                TenGV = reader["TenGV"].ToString(),
+                                GioiTinh = reader["GioiTinh"]?.ToString(),
+                                DiaChi = reader["DiaChi"]?.ToString(),
+                                Email = reader["Email"]?.ToString(),
+                                SDT = reader["SDT"]?.ToString(),
+                                HocVi = reader["HocVi"]?.ToString(),
+                                MaKV = reader["MaKV"].ToString()
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi tải Giảng viên: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            return instructors;
+        }
+
+        // ===== CRUD: SinhVien =====
+        public bool InsertStudent(Student s)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = @"INSERT INTO SinhVien (MaSV, TenSV, NgaySinh, GioiTinh, SDT, Email, DiaChi, MaCTDT, Password)
+                                   VALUES (@MaSV, @TenSV, @NgaySinh, @GioiTinh, @SDT, @Email, @DiaChi, @MaCTDT, @Password)";
+                    using (var cmd = new SqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@MaSV", s.MaSV);
+                        cmd.Parameters.AddWithValue("@TenSV", s.TenSV);
+                        cmd.Parameters.AddWithValue("@NgaySinh", s.NgaySinh);
+                        cmd.Parameters.AddWithValue("@GioiTinh", (object)s.GioiTinh ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@SDT", (object)s.SDT ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@Email", (object)s.Email ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@DiaChi", (object)s.DiaChi ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@MaCTDT", s.MaCTDT);
+                        cmd.Parameters.AddWithValue("@Password", (object)s.Password ?? DBNull.Value);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi thêm sinh viên: {ex.Message}");
+                return false;
+            }
+        }
+
+        public bool UpdateStudent(Student s)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = @"UPDATE SinhVien SET TenSV=@TenSV, NgaySinh=@NgaySinh, GioiTinh=@GioiTinh, SDT=@SDT, Email=@Email, DiaChi=@DiaChi, MaCTDT=@MaCTDT, Password=@Password WHERE MaSV=@MaSV";
+                    using (var cmd = new SqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@MaSV", s.MaSV);
+                        cmd.Parameters.AddWithValue("@TenSV", s.TenSV);
+                        cmd.Parameters.AddWithValue("@NgaySinh", s.NgaySinh);
+                        cmd.Parameters.AddWithValue("@GioiTinh", (object)s.GioiTinh ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@SDT", (object)s.SDT ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@Email", (object)s.Email ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@DiaChi", (object)s.DiaChi ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@MaCTDT", s.MaCTDT);
+                        cmd.Parameters.AddWithValue("@Password", (object)s.Password ?? DBNull.Value);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi cập nhật sinh viên: {ex.Message}");
+                return false;
+            }
+        }
+
+        public bool DeleteStudent(string maSV)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = "DELETE FROM SinhVien WHERE MaSV=@MaSV";
+                    using (var cmd = new SqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@MaSV", maSV);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi xóa sinh viên: {ex.Message}");
+                return false;
+            }
+        }
+
+        // ===== CRUD: GiangVien =====
+        public bool InsertInstructor(Instructor g)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = @"INSERT INTO GiangVien (MaGV, TenGV, GioiTinh, DiaChi, Email, SDT, HocVi, MaKV, Password)
+                                   VALUES (@MaGV, @TenGV, @GioiTinh, @DiaChi, @Email, @SDT, @HocVi, @MaKV, @Password)";
+                    using (var cmd = new SqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@MaGV", g.MaGV);
+                        cmd.Parameters.AddWithValue("@TenGV", g.TenGV);
+                        cmd.Parameters.AddWithValue("@GioiTinh", (object)g.GioiTinh ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@DiaChi", (object)g.DiaChi ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@Email", (object)g.Email ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@SDT", (object)g.SDT ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@HocVi", (object)g.HocVi ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@MaKV", g.MaKV);
+                        cmd.Parameters.AddWithValue("@Password", (object)g.Password ?? DBNull.Value);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi thêm giảng viên: {ex.Message}");
+                return false;
+            }
+        }
+
+        public bool UpdateInstructor(Instructor g)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = @"UPDATE GiangVien SET TenGV=@TenGV, GioiTinh=@GioiTinh, DiaChi=@DiaChi, Email=@Email, SDT=@SDT, HocVi=@HocVi, MaKV=@MaKV, Password=@Password WHERE MaGV=@MaGV";
+                    using (var cmd = new SqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@MaGV", g.MaGV);
+                        cmd.Parameters.AddWithValue("@TenGV", g.TenGV);
+                        cmd.Parameters.AddWithValue("@GioiTinh", (object)g.GioiTinh ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@DiaChi", (object)g.DiaChi ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@Email", (object)g.Email ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@SDT", (object)g.SDT ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@HocVi", (object)g.HocVi ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@MaKV", g.MaKV);
+                        cmd.Parameters.AddWithValue("@Password", (object)g.Password ?? DBNull.Value);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi cập nhật giảng viên: {ex.Message}");
+                return false;
+            }
+        }
+
+        public bool DeleteInstructor(string maGV)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = "DELETE FROM GiangVien WHERE MaGV=@MaGV";
+                    using (var cmd = new SqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@MaGV", maGV);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi xóa giảng viên: {ex.Message}");
+                return false;
+            }
         }
 
         // Get students in a course section

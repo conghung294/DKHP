@@ -83,6 +83,15 @@ namespace WindowsFormsApp1.Forms
 
             var db = DatabaseHelper.Instance;
 
+            // Thử login Admin trước
+            if (db.LoginAdmin(username, password, out string adminName))
+            {
+                var adminForm = new AdminMainForm(adminName);
+                this.Hide();
+                adminForm.Show();
+                return;
+            }
+
             // Try login as student
             var student = db.LoginStudent(username, password);
             if (student != null)
