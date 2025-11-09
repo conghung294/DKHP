@@ -25,13 +25,13 @@ namespace WindowsFormsApp1.Forms
             this.txtInstructorInfo = new System.Windows.Forms.TextBox();
             this.lblMyCourses = new System.Windows.Forms.Label();
             this.dgvMyCourses = new System.Windows.Forms.DataGridView();
-            this.btnViewStudents = new System.Windows.Forms.Button();
-            this.btnLogout = new System.Windows.Forms.Button();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.btnViewStudents = new System.Windows.Forms.Button();
+            this.btnLogout = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvMyCourses)).BeginInit();
             this.SuspendLayout();
             // 
@@ -85,32 +85,6 @@ namespace WindowsFormsApp1.Forms
             this.dgvMyCourses.Size = new System.Drawing.Size(1200, 400);
             this.dgvMyCourses.TabIndex = 3;
             // 
-            // btnViewStudents
-            // 
-            this.btnViewStudents.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(122)))), ((int)(((byte)(204)))));
-            this.btnViewStudents.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnViewStudents.ForeColor = System.Drawing.Color.White;
-            this.btnViewStudents.Location = new System.Drawing.Point(400, 680);
-            this.btnViewStudents.Name = "btnViewStudents";
-            this.btnViewStudents.Size = new System.Drawing.Size(200, 45);
-            this.btnViewStudents.TabIndex = 4;
-            this.btnViewStudents.Text = "Xem danh sách sinh viên";
-            this.btnViewStudents.UseVisualStyleBackColor = false;
-            this.btnViewStudents.Click += new System.EventHandler(this.btnViewStudents_Click);
-            // 
-            // btnLogout
-            // 
-            this.btnLogout.BackColor = System.Drawing.Color.Gray;
-            this.btnLogout.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnLogout.ForeColor = System.Drawing.Color.White;
-            this.btnLogout.Location = new System.Drawing.Point(1010, 680);
-            this.btnLogout.Name = "btnLogout";
-            this.btnLogout.Size = new System.Drawing.Size(150, 45);
-            this.btnLogout.TabIndex = 7;
-            this.btnLogout.Text = "Đăng xuất";
-            this.btnLogout.UseVisualStyleBackColor = false;
-            this.btnLogout.Click += new System.EventHandler(this.btnLogout_Click);
-            // 
             // dataGridViewTextBoxColumn1
             // 
             this.dataGridViewTextBoxColumn1.HeaderText = "Mã lớp HP";
@@ -145,6 +119,32 @@ namespace WindowsFormsApp1.Forms
             this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
             this.dataGridViewTextBoxColumn6.ReadOnly = true;
+            // 
+            // btnViewStudents
+            // 
+            this.btnViewStudents.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(122)))), ((int)(((byte)(204)))));
+            this.btnViewStudents.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnViewStudents.ForeColor = System.Drawing.Color.White;
+            this.btnViewStudents.Location = new System.Drawing.Point(400, 680);
+            this.btnViewStudents.Name = "btnViewStudents";
+            this.btnViewStudents.Size = new System.Drawing.Size(200, 45);
+            this.btnViewStudents.TabIndex = 4;
+            this.btnViewStudents.Text = "Xem danh sách sinh viên";
+            this.btnViewStudents.UseVisualStyleBackColor = false;
+            this.btnViewStudents.Click += new System.EventHandler(this.btnViewStudents_Click);
+            // 
+            // btnLogout
+            // 
+            this.btnLogout.BackColor = System.Drawing.Color.Gray;
+            this.btnLogout.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnLogout.ForeColor = System.Drawing.Color.White;
+            this.btnLogout.Location = new System.Drawing.Point(1010, 680);
+            this.btnLogout.Name = "btnLogout";
+            this.btnLogout.Size = new System.Drawing.Size(150, 45);
+            this.btnLogout.TabIndex = 7;
+            this.btnLogout.Text = "Đăng xuất";
+            this.btnLogout.UseVisualStyleBackColor = false;
+            this.btnLogout.Click += new System.EventHandler(this.btnLogout_Click);
             // 
             // InstructorMainForm
             // 
