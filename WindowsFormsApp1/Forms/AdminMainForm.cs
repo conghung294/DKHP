@@ -17,12 +17,24 @@ namespace WindowsFormsApp1.Forms
         private TabControl tabControl;
         private TabPage tabStudents;
         private TabPage tabInstructors;
+        private TabPage tabCourses;
+        private TabPage tabSections;
+        private TabPage tabDepartments;
         private DataGridView dgvStudents;
         private DataGridView dgvInstructors;
+        private DataGridView dgvCourses;
+        private DataGridView dgvSections;
+        private DataGridView dgvDepartments;
         private ToolStrip studentsToolbar;
         private ToolStrip instructorsToolbar;
+        private ToolStrip coursesToolbar;
+        private ToolStrip sectionsToolbar;
+        private ToolStrip departmentsToolbar;
         private Button btnNavStudents;
         private Button btnNavInstructors;
+        private Button btnNavCourses;
+        private Button btnNavSections;
+        private Button btnNavDepartments;
         private PictureBox picLogo;
 
         private readonly string adminName;
@@ -40,6 +52,9 @@ namespace WindowsFormsApp1.Forms
 
             LoadStudents();
             LoadInstructors();
+            LoadCourses();
+            LoadSections();
+            LoadDepartments();
         }
 
         private void CreateLayout()
@@ -57,19 +72,28 @@ namespace WindowsFormsApp1.Forms
             TryLoadLogo(picLogo);
             var lblApp = new Label { Text = "Admin", AutoSize = true, Font = ThemeHelper.SubHeaderFont, ForeColor = ThemeHelper.TextDark, Location = new Point(96, 36) };
 
-            btnNavStudents = new Button { Text = "Quản lý sinh viên", Location = new Point(12, 100), Size = new Size(196, 40) };
-            btnNavInstructors = new Button { Text = "Quản lý giảng viên", Location = new Point(12, 148), Size = new Size(196, 40) };
+            btnNavStudents = new Button { Text = "Quản lý sinh viên", Location = new Point(12, 100), Size = new Size(196, 38) };
+            btnNavInstructors = new Button { Text = "Quản lý giảng viên", Location = new Point(12, 142), Size = new Size(196, 38) };
+            btnNavCourses = new Button { Text = "Quản lý môn học", Location = new Point(12, 184), Size = new Size(196, 38) };
+            btnNavSections = new Button { Text = "Lớp học phần", Location = new Point(12, 226), Size = new Size(196, 38) };
+            btnNavDepartments = new Button { Text = "Khoa", Location = new Point(12, 268), Size = new Size(196, 38) };
 
             sidebarPanel.Controls.Add(picLogo);
             sidebarPanel.Controls.Add(lblApp);
             sidebarPanel.Controls.Add(btnNavStudents);
             sidebarPanel.Controls.Add(btnNavInstructors);
+            sidebarPanel.Controls.Add(btnNavCourses);
+            sidebarPanel.Controls.Add(btnNavSections);
+            sidebarPanel.Controls.Add(btnNavDepartments);
 
             contentPanel = new Panel { Dock = DockStyle.Fill, BackColor = ThemeHelper.BackgroundLight };
 
             tabControl = new TabControl { Dock = DockStyle.Fill };
             tabStudents = new TabPage("Quản lý sinh viên");
             tabInstructors = new TabPage("Quản lý giảng viên");
+            tabCourses = new TabPage("Quản lý môn học");
+            tabSections = new TabPage("Lớp học phần");
+            tabDepartments = new TabPage("Khoa");
 
             // Students tab
             studentsToolbar = new ToolStrip { GripStyle = ToolStripGripStyle.Hidden, Dock = DockStyle.Top };
@@ -93,8 +117,44 @@ namespace WindowsFormsApp1.Forms
             tabInstructors.Controls.Add(dgvInstructors);
             tabInstructors.Controls.Add(instructorsToolbar);
 
+            // Courses tab
+            coursesToolbar = new ToolStrip { GripStyle = ToolStripGripStyle.Hidden, Dock = DockStyle.Top };
+            coursesToolbar.Items.Add(new ToolStripButton("Thêm") { Tag = "add" });
+            coursesToolbar.Items.Add(new ToolStripButton("Sửa") { Tag = "edit" });
+            coursesToolbar.Items.Add(new ToolStripButton("Xóa") { Tag = "delete" });
+            coursesToolbar.Items.Add(new ToolStripSeparator());
+            coursesToolbar.Items.Add(new ToolStripButton("Tải lại") { Tag = "refresh" });
+            dgvCourses = new DataGridView { Dock = DockStyle.Fill, ReadOnly = true, AllowUserToAddRows = false, AllowUserToDeleteRows = false, SelectionMode = DataGridViewSelectionMode.FullRowSelect, MultiSelect = false, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill };
+            tabCourses.Controls.Add(dgvCourses);
+            tabCourses.Controls.Add(coursesToolbar);
+
+            // Sections tab
+            sectionsToolbar = new ToolStrip { GripStyle = ToolStripGripStyle.Hidden, Dock = DockStyle.Top };
+            sectionsToolbar.Items.Add(new ToolStripButton("Thêm") { Tag = "add" });
+            sectionsToolbar.Items.Add(new ToolStripButton("Sửa") { Tag = "edit" });
+            sectionsToolbar.Items.Add(new ToolStripButton("Xóa") { Tag = "delete" });
+            sectionsToolbar.Items.Add(new ToolStripSeparator());
+            sectionsToolbar.Items.Add(new ToolStripButton("Tải lại") { Tag = "refresh" });
+            dgvSections = new DataGridView { Dock = DockStyle.Fill, ReadOnly = true, AllowUserToAddRows = false, AllowUserToDeleteRows = false, SelectionMode = DataGridViewSelectionMode.FullRowSelect, MultiSelect = false, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill };
+            tabSections.Controls.Add(dgvSections);
+            tabSections.Controls.Add(sectionsToolbar);
+
+            // Departments tab
+            departmentsToolbar = new ToolStrip { GripStyle = ToolStripGripStyle.Hidden, Dock = DockStyle.Top };
+            departmentsToolbar.Items.Add(new ToolStripButton("Thêm") { Tag = "add" });
+            departmentsToolbar.Items.Add(new ToolStripButton("Sửa") { Tag = "edit" });
+            departmentsToolbar.Items.Add(new ToolStripButton("Xóa") { Tag = "delete" });
+            departmentsToolbar.Items.Add(new ToolStripSeparator());
+            departmentsToolbar.Items.Add(new ToolStripButton("Tải lại") { Tag = "refresh" });
+            dgvDepartments = new DataGridView { Dock = DockStyle.Fill, ReadOnly = true, AllowUserToAddRows = false, AllowUserToDeleteRows = false, SelectionMode = DataGridViewSelectionMode.FullRowSelect, MultiSelect = false, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill };
+            tabDepartments.Controls.Add(dgvDepartments);
+            tabDepartments.Controls.Add(departmentsToolbar);
+
             tabControl.TabPages.Add(tabStudents);
             tabControl.TabPages.Add(tabInstructors);
+            tabControl.TabPages.Add(tabCourses);
+            tabControl.TabPages.Add(tabSections);
+            tabControl.TabPages.Add(tabDepartments);
 
             // Ẩn header tab – chỉ dùng sidebar để điều hướng
             HideTabHeaders();
@@ -112,6 +172,12 @@ namespace WindowsFormsApp1.Forms
             ThemeHelper.ApplyDataGridViewStyle(dgvInstructors);
             ThemeHelper.ApplyButtonStyle(btnNavStudents, ThemeHelper.SidebarActive, Color.White, 6);
             ThemeHelper.ApplyButtonStyle(btnNavInstructors, ThemeHelper.PrimaryBlue, Color.White, 6);
+            ThemeHelper.ApplyDataGridViewStyle(dgvCourses);
+            ThemeHelper.ApplyDataGridViewStyle(dgvSections);
+            ThemeHelper.ApplyDataGridViewStyle(dgvDepartments);
+            ThemeHelper.ApplyButtonStyle(btnNavCourses, ThemeHelper.PrimaryBlue, Color.White, 6);
+            ThemeHelper.ApplyButtonStyle(btnNavSections, ThemeHelper.PrimaryBlue, Color.White, 6);
+            ThemeHelper.ApplyButtonStyle(btnNavDepartments, ThemeHelper.PrimaryBlue, Color.White, 6);
         }
 
         private void BindEvents()
@@ -149,6 +215,22 @@ namespace WindowsFormsApp1.Forms
             {
                 tabControl.SelectedTab = tabInstructors;
                 SetActiveSidebar(btnNavInstructors);
+            };
+
+            btnNavCourses.Click += (s, e) =>
+            {
+                tabControl.SelectedTab = tabCourses;
+                SetActiveSidebar(btnNavCourses);
+            };
+            btnNavSections.Click += (s, e) =>
+            {
+                tabControl.SelectedTab = tabSections;
+                SetActiveSidebar(btnNavSections);
+            };
+            btnNavDepartments.Click += (s, e) =>
+            {
+                tabControl.SelectedTab = tabDepartments;
+                SetActiveSidebar(btnNavDepartments);
             };
 
             studentsToolbar.ItemClicked += (s, e) =>
@@ -246,6 +328,139 @@ namespace WindowsFormsApp1.Forms
                         break;
                 }
             };
+
+            coursesToolbar.ItemClicked += (s, e) =>
+            {
+                switch (e.ClickedItem.Tag)
+                {
+                    case "add":
+                        using (var dlg = new AddEditCourseForm())
+                        {
+                            if (dlg.ShowDialog(this) == DialogResult.OK)
+                            {
+                                if (DatabaseHelper.Instance.InsertCourse(dlg.Result)) LoadCourses();
+                            }
+                        }
+                        break;
+                    case "edit":
+                        if (dgvCourses.CurrentRow != null)
+                        {
+                            var crow = dgvCourses.CurrentRow.DataBoundItem as WindowsFormsApp1.Models.Course;
+                            if (crow != null)
+                            {
+                                using (var dlg = new AddEditCourseForm(crow))
+                                {
+                                    if (dlg.ShowDialog(this) == DialogResult.OK)
+                                    {
+                                        if (DatabaseHelper.Instance.UpdateCourse(dlg.Result)) LoadCourses();
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case "delete":
+                        if (dgvCourses.CurrentRow != null)
+                        {
+                            var crow = dgvCourses.CurrentRow.DataBoundItem as WindowsFormsApp1.Models.Course;
+                            if (crow != null && MessageBox.Show("Xóa môn học này?", "Xác nhận", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                            {
+                                if (DatabaseHelper.Instance.DeleteCourse(crow.MaMH)) LoadCourses();
+                            }
+                        }
+                        break;
+                    case "refresh":
+                        LoadCourses();
+                        break;
+                }
+            };
+
+            sectionsToolbar.ItemClicked += (s, e) =>
+            {
+                switch (e.ClickedItem.Tag)
+                {
+                    case "add":
+                        using (var dlg = new AddEditSectionForm())
+                        {
+                            if (dlg.ShowDialog(this) == DialogResult.OK)
+                            {
+                                if (DatabaseHelper.Instance.InsertSection(dlg.Result)) LoadSections();
+                            }
+                        }
+                        break;
+                    case "edit":
+                        if (dgvSections.CurrentRow != null)
+                        {
+                            var lrow = dgvSections.CurrentRow.DataBoundItem as WindowsFormsApp1.Models.CourseSection;
+                            if (lrow != null)
+                            {
+                                using (var dlg = new AddEditSectionForm(lrow))
+                                {
+                                    if (dlg.ShowDialog(this) == DialogResult.OK)
+                                    {
+                                        if (DatabaseHelper.Instance.UpdateSection(dlg.Result)) LoadSections();
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case "delete":
+                        if (dgvSections.CurrentRow != null)
+                        {
+                            var lrow = dgvSections.CurrentRow.DataBoundItem as WindowsFormsApp1.Models.CourseSection;
+                            if (lrow != null && MessageBox.Show("Xóa lớp học phần này?", "Xác nhận", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                            {
+                                if (DatabaseHelper.Instance.DeleteSection(lrow.MaLHP)) LoadSections();
+                            }
+                        }
+                        break;
+                    case "refresh":
+                        LoadSections();
+                        break;
+                }
+            };
+
+            departmentsToolbar.ItemClicked += (s, e) =>
+            {
+                switch (e.ClickedItem.Tag)
+                {
+                    case "add":
+                        using (var dlg = new AddEditDepartmentForm())
+                        {
+                            if (dlg.ShowDialog(this) == DialogResult.OK)
+                            {
+                                if (DatabaseHelper.Instance.InsertDepartment(dlg.ResultMa, dlg.ResultTen)) LoadDepartments();
+                            }
+                        }
+                        break;
+                    case "edit":
+                        if (dgvDepartments.CurrentRow != null)
+                        {
+                            var ma = dgvDepartments.CurrentRow.Cells["MaKhoa"].Value?.ToString();
+                            var ten = dgvDepartments.CurrentRow.Cells["TenKhoa"].Value?.ToString();
+                            using (var dlg = new AddEditDepartmentForm(ma, ten))
+                            {
+                                if (dlg.ShowDialog(this) == DialogResult.OK)
+                                {
+                                    if (DatabaseHelper.Instance.UpdateDepartment(dlg.ResultMa, dlg.ResultTen)) LoadDepartments();
+                                }
+                            }
+                        }
+                        break;
+                    case "delete":
+                        if (dgvDepartments.CurrentRow != null)
+                        {
+                            var ma = dgvDepartments.CurrentRow.Cells["MaKhoa"].Value?.ToString();
+                            if (!string.IsNullOrEmpty(ma) && MessageBox.Show("Xóa khoa này?", "Xác nhận", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                            {
+                                if (DatabaseHelper.Instance.DeleteDepartment(ma)) LoadDepartments();
+                            }
+                        }
+                        break;
+                    case "refresh":
+                        LoadDepartments();
+                        break;
+                }
+            };
         }
 
         private void LoadStudents()
@@ -260,6 +475,27 @@ namespace WindowsFormsApp1.Forms
             var data = DatabaseHelper.Instance.GetAllInstructors();
             ConfigureInstructorsGrid();
             dgvInstructors.DataSource = data;
+        }
+
+        private void LoadCourses()
+        {
+            var data = DatabaseHelper.Instance.GetAllCourses();
+            ConfigureCoursesGrid();
+            dgvCourses.DataSource = data;
+        }
+
+        private void LoadSections()
+        {
+            var data = DatabaseHelper.Instance.GetAllSections();
+            ConfigureSectionsGrid();
+            dgvSections.DataSource = data;
+        }
+
+        private void LoadDepartments()
+        {
+            var data = DatabaseHelper.Instance.GetAllDepartments();
+            ConfigureDepartmentsGrid();
+            dgvDepartments.DataSource = data;
         }
 
         private void SetActiveSidebar(Button active)
@@ -328,6 +564,37 @@ namespace WindowsFormsApp1.Forms
             dgvInstructors.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "SDT", DataPropertyName = "SDT" });
             dgvInstructors.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "HocVi", DataPropertyName = "HocVi" });
             dgvInstructors.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "MaKV", DataPropertyName = "MaKV" });
+        }
+
+        private void ConfigureCoursesGrid()
+        {
+            dgvCourses.AutoGenerateColumns = false;
+            dgvCourses.Columns.Clear();
+            dgvCourses.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "MaMH", DataPropertyName = "MaMH" });
+            dgvCourses.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "TenHocPhan", DataPropertyName = "TenHocPhan" });
+            dgvCourses.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "SoTC", DataPropertyName = "SoTC" });
+            dgvCourses.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "MaHocPhanTienQuyet", DataPropertyName = "MaHocPhanTienQuyet" });
+            dgvCourses.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "MaHocKi", DataPropertyName = "MaHocKi" });
+        }
+
+        private void ConfigureSectionsGrid()
+        {
+            dgvSections.AutoGenerateColumns = false;
+            dgvSections.Columns.Clear();
+            dgvSections.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "MaLHP", DataPropertyName = "MaLHP" });
+            dgvSections.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "TenLop", DataPropertyName = "TenLop" });
+            dgvSections.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "MaHP", DataPropertyName = "MaHP" });
+            dgvSections.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "MaGV", DataPropertyName = "MaGV" });
+            dgvSections.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "SiSo", DataPropertyName = "SiSo" });
+            dgvSections.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "LichHoc", DataPropertyName = "LichHoc" });
+        }
+
+        private void ConfigureDepartmentsGrid()
+        {
+            dgvDepartments.AutoGenerateColumns = false;
+            dgvDepartments.Columns.Clear();
+            dgvDepartments.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "MaKhoa", DataPropertyName = "MaKhoa" });
+            dgvDepartments.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "TenKhoa", DataPropertyName = "TenKhoa" });
         }
     }
 }

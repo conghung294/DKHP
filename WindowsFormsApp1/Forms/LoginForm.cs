@@ -45,17 +45,6 @@ namespace WindowsFormsApp1.Forms
             
             // Style cho button
             ThemeHelper.ApplyButtonStyle(btnLogin, ThemeHelper.PrimaryBlue, Color.White, 8);
-
-            // Ẩn dòng "Thông tin hệ thống"
-            try
-            {
-                if (lblInfo != null)
-                {
-                    lblInfo.Visible = false;
-                    lblInfo.Enabled = false;
-                }
-            }
-            catch { }
         }
         
         private void LoginForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -113,25 +102,6 @@ namespace WindowsFormsApp1.Forms
             }
 
             MessageBox.Show("Tài khoản hoặc mật khẩu không đúng!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-
-        private void lblInfo_Click(object sender, EventArgs e)
-        {
-            // Test connection khi click vào Info
-            var db = DatabaseHelper.Instance;
-            string message;
-            bool success = db.TestConnection(out message);
-            
-            string info = "=== THÔNG TIN HỆ THỐNG ===\n\n";
-            info += message + "\n\n";
-            info += "=== HƯỚNG DẪN ĐĂNG NHẬP ===\n";
-            info += "Sinh viên: Nhập MaSV và mật khẩu từ database\n";
-            info += "Giảng viên: Nhập MaGV và mật khẩu từ database\n";
-            info += "Mật khẩu được lưu trong cột Password\n\n";
-            info += "Phiên bản: 1.0";
-            
-            MessageBoxIcon icon = success ? MessageBoxIcon.Information : MessageBoxIcon.Warning;
-            MessageBox.Show(info, success ? "Kết nối thành công" : "Cảnh báo kết nối", MessageBoxButtons.OK, icon);
         }
     }
 }

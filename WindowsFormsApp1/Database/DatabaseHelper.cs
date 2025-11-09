@@ -335,6 +335,357 @@ namespace WindowsFormsApp1.Database
             return courses;
         }
 
+        // ===== ADMIN: COURSES =====
+        public List<Course> GetAllCourses()
+        {
+            var courses = new List<Course>();
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = "SELECT MaMH, TenHocPhan, SoTC, MaHocPhanTienQuyet, MaHocKi FROM MonHoc";
+                    using (var command = new SqlCommand(sql, connection))
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            courses.Add(new Course
+                            {
+                                MaMH = reader["MaMH"].ToString(),
+                                TenHocPhan = reader["TenHocPhan"].ToString(),
+                                SoTC = Convert.ToInt32(reader["SoTC"]),
+                                MaHocPhanTienQuyet = reader["MaHocPhanTienQuyet"]?.ToString(),
+                                MaHocKi = Convert.ToInt32(reader["MaHocKi"])
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi tải Môn học: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            return courses;
+        }
+
+        public bool InsertCourse(Course c)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = @"INSERT INTO MonHoc (MaMH, TenHocPhan, SoTC, MaHocPhanTienQuyet, MaHocKi)
+                                   VALUES (@MaMH, @TenHocPhan, @SoTC, @MaTQ, @MaHK)";
+                    using (var cmd = new SqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@MaMH", c.MaMH);
+                        cmd.Parameters.AddWithValue("@TenHocPhan", c.TenHocPhan);
+                        cmd.Parameters.AddWithValue("@SoTC", c.SoTC);
+                        cmd.Parameters.AddWithValue("@MaTQ", (object)c.MaHocPhanTienQuyet ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@MaHK", c.MaHocKi);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi thêm môn học: {ex.Message}");
+                return false;
+            }
+        }
+
+        public bool UpdateCourse(Course c)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = @"UPDATE MonHoc SET TenHocPhan=@TenHocPhan, SoTC=@SoTC, MaHocPhanTienQuyet=@MaTQ, MaHocKi=@MaHK WHERE MaMH=@MaMH";
+                    using (var cmd = new SqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@MaMH", c.MaMH);
+                        cmd.Parameters.AddWithValue("@TenHocPhan", c.TenHocPhan);
+                        cmd.Parameters.AddWithValue("@SoTC", c.SoTC);
+                        cmd.Parameters.AddWithValue("@MaTQ", (object)c.MaHocPhanTienQuyet ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@MaHK", c.MaHocKi);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi cập nhật môn học: {ex.Message}");
+                return false;
+            }
+        }
+
+        public bool DeleteCourse(string maMH)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = "DELETE FROM MonHoc WHERE MaMH=@MaMH";
+                    using (var cmd = new SqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@MaMH", maMH);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi xóa môn học: {ex.Message}");
+                return false;
+            }
+        }
+
+        // ===== ADMIN: SECTIONS =====
+        public List<CourseSection> GetAllSections()
+        {
+            var list = new List<CourseSection>();
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = @"SELECT l.MaLHP, l.TenLop, l.MaHP, l.MaGV, l.SiSo, l.LichHoc,
+                                           m.TenHocPhan, g.TenGV,
+                                           (SELECT COUNT(*) FROM DangKi d WHERE d.MaLHP = l.MaLHP) as SoLuongDangKy
+                                    FROM LopHocPhan l
+                                    JOIN MonHoc m ON l.MaHP = m.MaMH
+                                    JOIN GiangVien g ON l.MaGV = g.MaGV";
+                    using (var cmd = new SqlCommand(sql, connection))
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(new CourseSection
+                            {
+                                MaLHP = reader["MaLHP"].ToString(),
+                                TenLop = reader["TenLop"].ToString(),
+                                MaHP = reader["MaHP"].ToString(),
+                                MaGV = reader["MaGV"].ToString(),
+                                SiSo = Convert.ToInt32(reader["SiSo"]),
+                                LichHoc = reader["LichHoc"]?.ToString(),
+                                SoLuongDangKy = Convert.ToInt32(reader["SoLuongDangKy"]),
+                                TenHocPhan = reader["TenHocPhan"].ToString(),
+                                TenGiangVien = reader["TenGV"].ToString()
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi tải Lớp học phần: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            return list;
+        }
+
+        public bool InsertSection(CourseSection s)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = @"INSERT INTO LopHocPhan (MaLHP, TenLop, MaHP, MaGV, SiSo, LichHoc)
+                                   VALUES (@MaLHP, @TenLop, @MaHP, @MaGV, @SiSo, @LichHoc)";
+                    using (var cmd = new SqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@MaLHP", s.MaLHP);
+                        cmd.Parameters.AddWithValue("@TenLop", s.TenLop);
+                        cmd.Parameters.AddWithValue("@MaHP", s.MaHP);
+                        cmd.Parameters.AddWithValue("@MaGV", s.MaGV);
+                        cmd.Parameters.AddWithValue("@SiSo", s.SiSo);
+                        cmd.Parameters.AddWithValue("@LichHoc", (object)s.LichHoc ?? DBNull.Value);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi thêm lớp học phần: {ex.Message}");
+                return false;
+            }
+        }
+
+        public bool UpdateSection(CourseSection s)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = @"UPDATE LopHocPhan SET TenLop=@TenLop, MaHP=@MaHP, MaGV=@MaGV, SiSo=@SiSo, LichHoc=@LichHoc WHERE MaLHP=@MaLHP";
+                    using (var cmd = new SqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@MaLHP", s.MaLHP);
+                        cmd.Parameters.AddWithValue("@TenLop", s.TenLop);
+                        cmd.Parameters.AddWithValue("@MaHP", s.MaHP);
+                        cmd.Parameters.AddWithValue("@MaGV", s.MaGV);
+                        cmd.Parameters.AddWithValue("@SiSo", s.SiSo);
+                        cmd.Parameters.AddWithValue("@LichHoc", (object)s.LichHoc ?? DBNull.Value);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi cập nhật lớp học phần: {ex.Message}");
+                return false;
+            }
+        }
+
+        public bool DeleteSection(string maLHP)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = "DELETE FROM LopHocPhan WHERE MaLHP=@MaLHP";
+                    using (var cmd = new SqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@MaLHP", maLHP);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi xóa lớp học phần: {ex.Message}");
+                return false;
+            }
+        }
+
+        public bool AssignInstructorToSection(string maLHP, string maGV)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = "UPDATE LopHocPhan SET MaGV=@MaGV WHERE MaLHP=@MaLHP";
+                    using (var cmd = new SqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@MaGV", maGV);
+                        cmd.Parameters.AddWithValue("@MaLHP", maLHP);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi phân công giảng viên: {ex.Message}");
+                return false;
+            }
+        }
+
+        // ===== ADMIN: DEPARTMENTS =====
+        public List<Department> GetAllDepartments()
+        {
+            var list = new List<Department>();
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = "SELECT MaKhoa, TenKhoa FROM Khoa";
+                    using (var cmd = new SqlCommand(sql, connection))
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(new Department
+                            {
+                                MaKhoa = reader["MaKhoa"].ToString(),
+                                TenKhoa = reader["TenKhoa"].ToString()
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi tải Khoa: {ex.Message}");
+            }
+            return list;
+        }
+
+        public bool InsertDepartment(string maKhoa, string tenKhoa)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = "INSERT INTO Khoa (MaKhoa, TenKhoa) VALUES (@Ma, @Ten)";
+                    using (var cmd = new SqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@Ma", maKhoa);
+                        cmd.Parameters.AddWithValue("@Ten", tenKhoa);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi thêm Khoa: {ex.Message}");
+                return false;
+            }
+        }
+
+        public bool UpdateDepartment(string maKhoa, string tenKhoa)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = "UPDATE Khoa SET TenKhoa=@Ten WHERE MaKhoa=@Ma";
+                    using (var cmd = new SqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@Ma", maKhoa);
+                        cmd.Parameters.AddWithValue("@Ten", tenKhoa);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi cập nhật Khoa: {ex.Message}");
+                return false;
+            }
+        }
+
+        public bool DeleteDepartment(string maKhoa)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = "DELETE FROM Khoa WHERE MaKhoa=@Ma";
+                    using (var cmd = new SqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@Ma", maKhoa);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi xóa Khoa: {ex.Message}");
+                return false;
+            }
+        }
+
         // Get available course sections (tính SoLuongDangKy từ DangKi)
         public List<CourseSection> GetAvailableCourseSections(string maHP)
         {
