@@ -89,9 +89,6 @@
     <Compile Include="Forms\StudentsListForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\TestConnectionForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="Models\AcademicProgram.cs" />
     <Compile Include="Models\Course.cs" />
     <Compile Include="Models\CourseSection.cs" />

@@ -314,7 +314,6 @@ namespace WindowsFormsApp1.Forms
                     section.TenHocPhan,
                     section.TenLop,
                     section.LichHoc,
-                    "", // LoaiMonHoc không có trong schema mới
                     $"{section.SoLuongDangKy}/{section.SiSo}"
                 );
             }
@@ -499,8 +498,6 @@ namespace WindowsFormsApp1.Forms
             studentsForm.ShowDialog();
         }
 
-
-
         private void btnLogout_Click(object sender, EventArgs e)
         {
             // Tìm LoginForm cũ và hiển thị lại
@@ -529,7 +526,7 @@ namespace WindowsFormsApp1.Forms
         private string ResolveLogoPath()
         {
             // Danh sách tên/đuôi có thể
-            var candidateNames = new[] { "neu.png", "logo.png", "neu.jpg", "logo.jpg", "neu.ico", "logo.ico" };
+            var candidateNames = new[] { "neu.png" };
             
             // 1) bin/Debug|Release/Resources
             var startup = Application.StartupPath;
@@ -550,13 +547,6 @@ namespace WindowsFormsApp1.Forms
                 }
             }
             catch { }
-            
-            // 3) Cùng thư mục chạy
-            foreach (var name in candidateNames)
-            {
-                var p = Path.Combine(startup, name);
-                if (File.Exists(p)) return p;
-            }
             
             return string.Empty;
         }

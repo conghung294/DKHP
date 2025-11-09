@@ -424,7 +424,7 @@ namespace WindowsFormsApp1.Forms
         private string ResolveLogoPath()
         {
             // Danh sách tên/đuôi có thể
-            var candidateNames = new[] { "neu.png", "logo.png", "neu.jpg", "logo.jpg", "neu.ico", "logo.ico" };
+            var candidateNames = new[] { "neu.png"};
             
             // 1) bin/Debug|Release/Resources
             var startup = Application.StartupPath;
@@ -445,14 +445,6 @@ namespace WindowsFormsApp1.Forms
                 }
             }
             catch { }
-            
-            // 3) Cùng thư mục chạy
-            foreach (var name in candidateNames)
-            {
-                var p = Path.Combine(startup, name);
-                if (File.Exists(p)) return p;
-            }
-            
             return string.Empty;
         }
         
@@ -511,17 +503,9 @@ namespace WindowsFormsApp1.Forms
                 // Update DataGridView sizes sau khi TabControl đã hoàn tất resize
                 this.BeginInvoke(new Action(() =>
                 {
-                    // QUAN TRỌNG: Đảm bảo DataGridViews vẫn ở trong TabPages
-                    EnsureDataGridViewsInTabPages();
-                    
-                    // Kiểm tra và reload dữ liệu nếu bị mất
-                    EnsureDataGridViewsHaveData();
-                    
                     // Update kích thước
                     UpdateDataGridViewSizes();
                     
-                    // Đảm bảo DataGridViews visible và enabled
-                    EnsureDataGridViewsVisible();
                     
                     // Force refresh để đảm bảo hiển thị đúng
                     if (tabControl != null)
@@ -563,85 +547,7 @@ namespace WindowsFormsApp1.Forms
             }
         }
         
-        private void EnsureDataGridViewsHaveData()
-        {
-            // Kiểm tra và reload dữ liệu nếu DataGridView bị mất dữ liệu
-            // Chỉ reload nếu không có dữ liệu và không đang trong quá trình load
-            if (dgvRegisteredCourses != null && dgvRegisteredCourses.Rows.Count == 0)
-            {
-                // Có thể dữ liệu chưa được load hoặc bị mất, reload lại
-                LoadRegisteredCourses();
-            }
-            
-            if (dgvAvailableCourses != null && dgvAvailableCourses.Rows.Count == 0)
-            {
-                // Có thể dữ liệu chưa được load hoặc bị mất, reload lại
-                LoadAvailableCourses();
-            }
-        }
-        
-        private void EnsureDataGridViewsInTabPages()
-        {
-            // Đảm bảo DataGridViews vẫn ở trong TabPages
-            if (!tabRegistered.Controls.Contains(dgvRegisteredCourses))
-            {
-                tabRegistered.Controls.Add(dgvRegisteredCourses);
-            }
-            if (!tabAvailable.Controls.Contains(dgvAvailableCourses))
-            {
-                tabAvailable.Controls.Add(dgvAvailableCourses);
-            }
-            
-            // Đảm bảo labels trong TabPages
-            if (!tabRegistered.Controls.Contains(lblRegisteredTitle))
-            {
-                tabRegistered.Controls.Add(lblRegisteredTitle);
-            }
-            if (!tabAvailable.Controls.Contains(lblAvailableTitle))
-            {
-                tabAvailable.Controls.Add(lblAvailableTitle);
-            }
-        }
-        
-        private void EnsureDataGridViewsVisible()
-        {
-            // Đảm bảo DataGridViews visible và enabled
-            if (dgvRegisteredCourses != null)
-            {
-                dgvRegisteredCourses.Visible = true;
-                dgvRegisteredCourses.Enabled = true;
-                dgvRegisteredCourses.Show();
-            }
-            if (dgvAvailableCourses != null)
-            {
-                dgvAvailableCourses.Visible = true;
-                dgvAvailableCourses.Enabled = true;
-                dgvAvailableCourses.Show();
-            }
-            
-            // Đảm bảo TabPages visible
-            if (tabRegistered != null)
-            {
-                tabRegistered.Visible = true;
-                tabRegistered.Enabled = true;
-            }
-            if (tabAvailable != null)
-            {
-                tabAvailable.Visible = true;
-                tabAvailable.Enabled = true;
-            }
-            
-            // Đảm bảo labels visible
-            if (lblRegisteredTitle != null)
-            {
-                lblRegisteredTitle.Visible = true;
-            }
-            if (lblAvailableTitle != null)
-            {
-                lblAvailableTitle.Visible = true;
-            }
-        }
-        
+
         private void TabControl_Resize(object sender, EventArgs e)
         {
             // Update DataGridView sizes khi TabControl resize
@@ -650,9 +556,6 @@ namespace WindowsFormsApp1.Forms
         
         private void UpdateDataGridViewSizes()
         {
-            // Đảm bảo DataGridViews ở trong TabPages trước
-            EnsureDataGridViewsInTabPages();
-            
             // Điều chỉnh DataGridView trong Tab Registered
             if (tabRegistered != null && dgvRegisteredCourses != null)
             {

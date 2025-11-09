@@ -101,7 +101,6 @@ WindowsFormsApp1/
 │   ├── AddEditSectionForm.cs        # Form thêm/sửa lớp học phần
 │   ├── AddEditDepartmentForm.cs     # Form thêm/sửa khoa
 │   ├── StudentsListForm.cs           # Form xem danh sách sinh viên
-│   └── TestConnectionForm.cs        # Form test kết nối database
 │
 ├── UI/                              # Quản lý giao diện
 │   └── ThemeHelper.cs               # Class quản lý theme, màu sắc, fonts
