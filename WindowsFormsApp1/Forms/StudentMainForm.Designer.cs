@@ -9,7 +9,6 @@ namespace WindowsFormsApp1.Forms
         private System.Windows.Forms.DataGridView dgvAvailableCourses;
         private System.Windows.Forms.Button btnRegister;
         private System.Windows.Forms.Button btnCancel;
-        private System.Windows.Forms.Button btnSchedule;
         private System.Windows.Forms.Button btnLogout;
         private System.Windows.Forms.TabControl tabControl;
         private System.Windows.Forms.TabPage tabRegistered;
@@ -39,7 +38,6 @@ namespace WindowsFormsApp1.Forms
             this.dgvAvailableCourses = new System.Windows.Forms.DataGridView();
             this.btnRegister = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
-            this.btnSchedule = new System.Windows.Forms.Button();
             this.btnLogout = new System.Windows.Forms.Button();
             this.tabControl.SuspendLayout();
             this.tabRegistered.SuspendLayout();
@@ -189,18 +187,6 @@ namespace WindowsFormsApp1.Forms
             this.btnCancel.UseVisualStyleBackColor = false;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
-            // btnSchedule
-            // 
-            this.btnSchedule.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(122)))), ((int)(((byte)(204)))));
-            this.btnSchedule.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSchedule.Location = new System.Drawing.Point(740, 680);
-            this.btnSchedule.Name = "btnSchedule";
-            this.btnSchedule.Size = new System.Drawing.Size(150, 40);
-            this.btnSchedule.TabIndex = 5;
-            this.btnSchedule.Text = "Xem lịch học";
-            this.btnSchedule.UseVisualStyleBackColor = false;
-            this.btnSchedule.Click += new System.EventHandler(this.btnSchedule_Click);
-            // 
             // btnLogout
             // 
             this.btnLogout.BackColor = System.Drawing.Color.Gray;
@@ -220,7 +206,6 @@ namespace WindowsFormsApp1.Forms
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1250, 750);
             this.Controls.Add(this.btnLogout);
-            this.Controls.Add(this.btnSchedule);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnRegister);
             this.Controls.Add(this.tabControl);

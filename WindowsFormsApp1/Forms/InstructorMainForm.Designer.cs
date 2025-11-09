@@ -7,8 +7,6 @@ namespace WindowsFormsApp1.Forms
         private System.Windows.Forms.TextBox txtInstructorInfo;
         private System.Windows.Forms.DataGridView dgvMyCourses;
         private System.Windows.Forms.Button btnViewStudents;
-        private System.Windows.Forms.Button btnEnterGrades;
-        private System.Windows.Forms.Button btnSchedule;
         private System.Windows.Forms.Button btnLogout;
         private System.Windows.Forms.Label lblMyCourses;
 
@@ -28,8 +26,6 @@ namespace WindowsFormsApp1.Forms
             this.lblMyCourses = new System.Windows.Forms.Label();
             this.dgvMyCourses = new System.Windows.Forms.DataGridView();
             this.btnViewStudents = new System.Windows.Forms.Button();
-            this.btnEnterGrades = new System.Windows.Forms.Button();
-            this.btnSchedule = new System.Windows.Forms.Button();
             this.btnLogout = new System.Windows.Forms.Button();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -104,31 +100,6 @@ namespace WindowsFormsApp1.Forms
             this.btnViewStudents.UseVisualStyleBackColor = false;
             this.btnViewStudents.Click += new System.EventHandler(this.btnViewStudents_Click);
             // 
-            // btnEnterGrades
-            // 
-            this.btnEnterGrades.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(136)))), ((int)(((byte)(0)))));
-            this.btnEnterGrades.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnEnterGrades.ForeColor = System.Drawing.Color.White;
-            this.btnEnterGrades.Location = new System.Drawing.Point(620, 680);
-            this.btnEnterGrades.Name = "btnEnterGrades";
-            this.btnEnterGrades.Size = new System.Drawing.Size(200, 45);
-            this.btnEnterGrades.TabIndex = 5;
-            this.btnEnterGrades.Text = "Nhập điểm";
-            this.btnEnterGrades.UseVisualStyleBackColor = false;
-            this.btnEnterGrades.Click += new System.EventHandler(this.btnEnterGrades_Click);
-            // 
-            // btnSchedule
-            // 
-            this.btnSchedule.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(150)))), ((int)(((byte)(0)))));
-            this.btnSchedule.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSchedule.Location = new System.Drawing.Point(840, 680);
-            this.btnSchedule.Name = "btnSchedule";
-            this.btnSchedule.Size = new System.Drawing.Size(150, 45);
-            this.btnSchedule.TabIndex = 6;
-            this.btnSchedule.Text = "Lịch dạy";
-            this.btnSchedule.UseVisualStyleBackColor = false;
-            this.btnSchedule.Click += new System.EventHandler(this.btnSchedule_Click);
-            // 
             // btnLogout
             // 
             this.btnLogout.BackColor = System.Drawing.Color.Gray;
@@ -190,8 +161,6 @@ namespace WindowsFormsApp1.Forms
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1250, 750);
             this.Controls.Add(this.btnLogout);
-            this.Controls.Add(this.btnSchedule);
-            this.Controls.Add(this.btnEnterGrades);
             this.Controls.Add(this.btnViewStudents);
             this.Controls.Add(this.dgvMyCourses);
             this.Controls.Add(this.lblMyCourses);

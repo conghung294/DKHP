@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using WindowsFormsApp1.Database;
@@ -94,6 +95,27 @@ namespace WindowsFormsApp1.Forms
             lblUserInfo.TextAlign = ContentAlignment.TopLeft;
             lblUserInfo.Padding = new Padding(0);
             
+            // Thêm logo thay cho dòng "Xin chào"
+            try
+            {
+                var logoPath = ResolveLogoPath();
+                if (!string.IsNullOrEmpty(logoPath) && File.Exists(logoPath))
+                {
+                    PictureBox picLogo = new PictureBox();
+                    picLogo.Size = new Size(64, 64);
+                    picLogo.Location = new Point(5, 5);
+                    picLogo.SizeMode = PictureBoxSizeMode.Zoom;
+                    using (var fs = new FileStream(logoPath, FileMode.Open, FileAccess.Read))
+                    {
+                        picLogo.Image = Image.FromStream(fs);
+                    }
+                    userInfoPanel.Controls.Add(picLogo);
+                    // Ẩn label "Xin chào"
+                    lblUserInfo.Visible = false;
+                }
+            }
+            catch { /* Bỏ qua, fallback về label */ }
+            
             userInfoPanel.Controls.Add(lblUserInfo);
             
             btnHome = new Button();
@@ -135,50 +157,54 @@ namespace WindowsFormsApp1.Forms
             sidebarPanel.Controls.Add(logoutPanel);
             logoutPanel.BringToFront();
             
-            // Content Panel
+            // Content Panel (chứa các controls cũ)
+            // QUAN TRỌNG: Không dùng Dock = Fill để tránh bị sidebar và header che
+            // Thay vào đó, dùng Dock với điều chỉnh vị trí
             contentPanel = new Panel();
-            contentPanel.Dock = DockStyle.Fill;
             contentPanel.BackColor = ThemeHelper.BackgroundWhite;
             contentPanel.Padding = new Padding(25, 25, 25, 25);
             contentPanel.BorderStyle = BorderStyle.None;
+            // ContentPanel sẽ được đặt vị trí và kích thước sau khi header và sidebar đã được add
             
             // Di chuyển controls vào contentPanel
             lblWelcome.Parent = contentPanel;
             txtInstructorInfo.Parent = contentPanel;
             dgvMyCourses.Parent = contentPanel;
             btnViewStudents.Parent = contentPanel;
-            btnEnterGrades.Parent = contentPanel;
-            btnSchedule.Parent = contentPanel;
             btnLogout.Parent = contentPanel;
             
-            // Điều chỉnh vị trí (đã có padding)
+            // Điều chỉnh vị trí controls trong contentPanel (padding đã được set ở Panel level)
             lblWelcome.Location = new Point(0, 0);
-            txtInstructorInfo.Location = new Point(0, 40);
-            txtInstructorInfo.Size = new Size(400, 120);
+            // Ẩn textbox cũ, thay bằng card đẹp
+            txtInstructorInfo.Visible = false;
             
-            // DataGridView - đảm bảo hiển thị rõ ràng
-            dgvMyCourses.Location = new Point(0, 170);
-            dgvMyCourses.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            dgvMyCourses.Size = new Size(contentPanel.Width, contentPanel.Height - 250);
-            dgvMyCourses.BringToFront();
-            dgvMyCourses.Visible = true;
+            // Tạo card thông tin giảng viên (UI đẹp hơn thay cho txtInstructorInfo)
+            CreateInstructorInfoCard();
+            
+            // Tạo TabControl giống StudentMainForm
+            CreateTabControl();
             
             // Buttons ở dưới cùng
             btnViewStudents.Location = new Point(0, contentPanel.Height - 60);
-            btnEnterGrades.Location = new Point(180, contentPanel.Height - 60);
-            btnSchedule.Location = new Point(360, contentPanel.Height - 60);
             btnViewStudents.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            btnEnterGrades.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            btnSchedule.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            btnLogout.Visible = false; // Ẩn button logout cũ
+            btnLogout.Visible = false; // Ẩn button logout cũ, dùng button trong sidebar
+            btnViewStudents.Visible = true;
             
-            // Thêm panels vào form - thứ tự quan trọng!
-            this.Controls.Add(contentPanel); // Thêm contentPanel trước
-            this.Controls.Add(sidebarPanel);
+            // Thêm các panels vào form - thứ tự QUAN TRỌNG!
+            // Header phải add đầu tiên (Dock = Top)
             this.Controls.Add(headerPanel);
             
-            // Đảm bảo thứ tự z-order đúng
-            contentPanel.SendToBack(); // ContentPanel ở sau
+            // Sidebar add thứ hai (Dock = Left, sẽ tự động ở dưới header)
+            this.Controls.Add(sidebarPanel);
+            
+            // ContentPanel add cuối cùng và đặt vị trí/kích thước để không bị che
+            this.Controls.Add(contentPanel);
+            
+            // Đặt vị trí và kích thước contentPanel để không bị sidebar và header che
+            UpdateContentPanelLayout();
+            
+            // Đảm bảo thứ tự z-order đúng trong form
+            contentPanel.SendToBack(); // ContentPanel ở sau (dưới sidebar và header)
             sidebarPanel.BringToFront(); // Sidebar ở giữa
             headerPanel.BringToFront(); // Header ở trên cùng
             
@@ -188,18 +214,42 @@ namespace WindowsFormsApp1.Forms
         
         private void InstructorMainForm_Resize(object sender, EventArgs e)
         {
-            if (contentPanel != null && dgvMyCourses != null)
+            // Cập nhật layout của contentPanel khi form resize
+            UpdateContentPanelLayout();
+            
+            if (contentPanel != null && tabControl != null)
             {
-                // Update DataGridView size khi form resize
-                dgvMyCourses.Size = new Size(contentPanel.Width, contentPanel.Height - 250);
+                // Update TabControl size khi form resize
+                int buttonBarHeight = 60;
+                int bottomMargin = 20;
+                int tabTop = tabControl.Location.Y;
+                int tabControlHeight = Math.Max(200, contentPanel.ClientSize.Height - tabTop - (buttonBarHeight + bottomMargin));
+                tabControl.Size = new Size(contentPanel.ClientSize.Width, tabControlHeight);
                 
                 // Update button positions
-                if (btnViewStudents != null && contentPanel.Height > 60)
+                if (btnViewStudents != null && contentPanel.ClientSize.Height > 60)
                 {
-                    btnViewStudents.Location = new Point(0, contentPanel.Height - 60);
-                    btnEnterGrades.Location = new Point(180, contentPanel.Height - 60);
-                    btnSchedule.Location = new Point(360, contentPanel.Height - 60);
+                    btnViewStudents.Location = new Point(0, contentPanel.ClientSize.Height - 60);
                 }
+            }
+        }
+        
+        private void UpdateContentPanelLayout()
+        {
+            if (contentPanel != null && sidebarPanel != null && headerPanel != null)
+            {
+                // ContentPanel bắt đầu từ bên phải sidebar và dưới header
+                int leftMargin = sidebarPanel.Width;
+                int topMargin = headerPanel.Height;
+                
+                contentPanel.Location = new Point(leftMargin, topMargin);
+                contentPanel.Size = new Size(
+                    this.ClientSize.Width - leftMargin,
+                    this.ClientSize.Height - topMargin
+                );
+                
+                // Dùng Anchor để tự động resize khi form resize
+                contentPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             }
         }
         
@@ -220,8 +270,6 @@ namespace WindowsFormsApp1.Forms
             
             // Style cho buttons
             ThemeHelper.ApplyButtonStyle(btnViewStudents, ThemeHelper.PrimaryBlue, Color.White);
-            ThemeHelper.ApplyButtonStyle(btnEnterGrades, ThemeHelper.PrimaryBlue, Color.White);
-            ThemeHelper.ApplyButtonStyle(btnSchedule, ThemeHelper.PrimaryBlue, Color.White);
         }
         
         private void InstructorMainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -250,17 +298,8 @@ namespace WindowsFormsApp1.Forms
 
         private void LoadInstructorInfo()
         {
-            // Load thông tin khoa từ database
-            string tenKhoa = db.GetDepartmentName(currentInstructor.MaKV);
-            
-            txtInstructorInfo.Text = $"Mã giảng viên: {currentInstructor.MaGV}\r\n" +
-                                     $"Họ tên: {currentInstructor.TenGV}\r\n" +
-                                     $"Khoa: {tenKhoa}\r\n" +
-                                     $"Học vị: {currentInstructor.HocVi}\r\n" +
-                                     $"Giới tính: {currentInstructor.GioiTinh}\r\n" +
-                                     $"Địa chỉ: {currentInstructor.DiaChi}\r\n" +
-                                     $"Email: {currentInstructor.Email}\r\n" +
-                                     $"SĐT: {currentInstructor.SDT}";
+            // Cập nhật card thông tin giảng viên
+            UpdateInstructorInfoCard();
         }
 
         private void LoadMyCourses()
@@ -280,6 +319,158 @@ namespace WindowsFormsApp1.Forms
                 );
             }
         }
+        
+        // Card thông tin giảng viên
+        private Panel instructorInfoCard;
+        private TableLayoutPanel tlpInstructorInfo;
+        private Label lblValueMaGV;
+        private Label lblValueHoTen;
+        private Label lblValueKhoa;
+        private Label lblValueHocVi;
+        private Label lblValueGioiTinh;
+        private Label lblValueDiaChi;
+        private Label lblValueEmail;
+        private Label lblValueSDT;
+        
+        private void CreateInstructorInfoCard()
+        {
+            // Tạo card thông tin giảng viên
+            instructorInfoCard = new Panel();
+            instructorInfoCard.Parent = contentPanel;
+            instructorInfoCard.Location = new Point(0, 35);
+            instructorInfoCard.Size = new Size(700, 120);
+            instructorInfoCard.BackColor = ThemeHelper.BackgroundWhite;
+            instructorInfoCard.BorderStyle = BorderStyle.FixedSingle;
+            instructorInfoCard.Padding = new Padding(12);
+            instructorInfoCard.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            
+            tlpInstructorInfo = new TableLayoutPanel();
+            tlpInstructorInfo.Parent = instructorInfoCard;
+            tlpInstructorInfo.Dock = DockStyle.Fill;
+            // Bố cục 2 cột: (Tiêu đề1, Giá trị1, Tiêu đề2, Giá trị2)
+            tlpInstructorInfo.ColumnCount = 4;
+            tlpInstructorInfo.RowCount = 4;
+            tlpInstructorInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 140));
+            tlpInstructorInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tlpInstructorInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 140));
+            tlpInstructorInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            for (int i = 0; i < 4; i++) tlpInstructorInfo.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            
+            // Hàm thêm cặp tiêu đề-giá trị vào vị trí (row, groupColumn)
+            void AddPair(int row, int groupColumn, string title, out Label valueLabel)
+            {
+                int colTitle = groupColumn == 0 ? 0 : 2;
+                int colValue = colTitle + 1;
+                var lblTitle = new Label();
+                lblTitle.Text = title;
+                lblTitle.AutoSize = true;
+                lblTitle.Margin = new Padding(0, 2, 6, 2);
+                lblTitle.TextAlign = ContentAlignment.MiddleLeft;
+                lblTitle.Font = ThemeHelper.LabelFont;
+                lblTitle.ForeColor = ThemeHelper.TextDark;
+                
+                valueLabel = new Label();
+                valueLabel.AutoSize = true;
+                valueLabel.Margin = new Padding(0, 2, 0, 2);
+                valueLabel.TextAlign = ContentAlignment.MiddleLeft;
+                valueLabel.Font = ThemeHelper.NormalFont;
+                valueLabel.ForeColor = ThemeHelper.TextDark;
+                
+                tlpInstructorInfo.Controls.Add(lblTitle, colTitle, row);
+                tlpInstructorInfo.Controls.Add(valueLabel, colValue, row);
+            }
+            
+            // Cột trái
+            AddPair(0, 0, "Mã giảng viên:", out lblValueMaGV);
+            AddPair(1, 0, "Họ tên:", out lblValueHoTen);
+            AddPair(2, 0, "Khoa:", out lblValueKhoa);
+            AddPair(3, 0, "Học vị:", out lblValueHocVi);
+            // Cột phải
+            AddPair(0, 1, "Giới tính:", out lblValueGioiTinh);
+            AddPair(1, 1, "Địa chỉ:", out lblValueDiaChi);
+            AddPair(2, 1, "Email:", out lblValueEmail);
+            AddPair(3, 1, "SĐT:", out lblValueSDT);
+            
+            // Load dữ liệu vào card
+            UpdateInstructorInfoCard();
+        }
+        
+        private void UpdateInstructorInfoCard()
+        {
+            if (instructorInfoCard == null) return;
+            
+            string tenKhoa = db.GetDepartmentName(currentInstructor.MaKV);
+            
+            lblValueMaGV.Text = currentInstructor.MaGV;
+            lblValueHoTen.Text = currentInstructor.TenGV;
+            lblValueKhoa.Text = tenKhoa;
+            lblValueHocVi.Text = currentInstructor.HocVi ?? "";
+            lblValueGioiTinh.Text = currentInstructor.GioiTinh ?? "";
+            lblValueDiaChi.Text = currentInstructor.DiaChi ?? "";
+            lblValueEmail.Text = currentInstructor.Email ?? "";
+            lblValueSDT.Text = currentInstructor.SDT ?? "";
+        }
+        
+        private TabControl tabControl;
+        private TabPage tabMyCourses;
+        private Label lblMyCoursesTitle;
+        
+        private void CreateTabControl()
+        {
+            // TabControl - đảm bảo hiển thị rõ ràng và không bị che
+            tabControl = new TabControl();
+            tabControl.Parent = contentPanel;
+            tabControl.Location = new Point(0, 190);
+            // Chừa chỗ cho vùng nút ở cuối
+            int buttonBarHeight = 60;
+            int bottomMargin = 20;
+            int availableHeight = Math.Max(200, contentPanel.ClientSize.Height - tabControl.Location.Y - (buttonBarHeight + bottomMargin));
+            tabControl.Size = new Size(contentPanel.ClientSize.Width, availableHeight);
+            tabControl.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tabControl.Visible = true;
+            tabControl.Enabled = true;
+            tabControl.Dock = DockStyle.None;
+            
+            // Tạo tab "Lớp của tôi"
+            tabMyCourses = new TabPage("Lớp của tôi");
+            tabMyCourses.UseVisualStyleBackColor = false;
+            tabMyCourses.BackColor = ThemeHelper.BackgroundWhite;
+            
+            // Label tiêu đề trong tab
+            lblMyCoursesTitle = new Label();
+            lblMyCoursesTitle.Text = "Các lớp đang giảng dạy:";
+            lblMyCoursesTitle.Font = ThemeHelper.SubHeaderFont;
+            lblMyCoursesTitle.ForeColor = ThemeHelper.TextDark;
+            lblMyCoursesTitle.AutoSize = true;
+            lblMyCoursesTitle.Location = new Point(10, 10);
+            tabMyCourses.Controls.Add(lblMyCoursesTitle);
+            
+            // DataGridView trong tab
+            dgvMyCourses.Location = new Point(10, 50);
+            dgvMyCourses.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            dgvMyCourses.Size = new Size(tabMyCourses.Width - 20, tabMyCourses.Height - 60);
+            dgvMyCourses.Visible = true;
+            dgvMyCourses.Enabled = true;
+            tabMyCourses.Controls.Add(dgvMyCourses);
+            
+            tabControl.TabPages.Add(tabMyCourses);
+            
+            tabControl.Appearance = TabAppearance.Normal;
+            tabControl.Multiline = false;
+            tabControl.SizeMode = TabSizeMode.Normal;
+            
+            // Xử lý resize TabControl
+            tabControl.Resize += TabControl_Resize;
+        }
+        
+        private void TabControl_Resize(object sender, EventArgs e)
+        {
+            if (tabControl != null && dgvMyCourses != null && tabMyCourses != null)
+            {
+                // Update DataGridView size khi TabControl resize
+                dgvMyCourses.Size = new Size(tabMyCourses.Width - 20, tabMyCourses.Height - 60);
+            }
+        }
 
         private void btnViewStudents_Click(object sender, EventArgs e)
         {
@@ -289,7 +480,13 @@ namespace WindowsFormsApp1.Forms
                 return;
             }
 
-            string maLHP = dgvMyCourses.SelectedRows[0].Cells[0].Value.ToString();
+            string maLHP = dgvMyCourses.SelectedRows[0].Cells[0].Value?.ToString();
+            if (string.IsNullOrEmpty(maLHP))
+            {
+                MessageBox.Show("Không tìm thấy mã lớp học phần!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            
             var students = db.GetStudentsInSection(maLHP);
 
             if (!students.Any())
@@ -302,54 +499,7 @@ namespace WindowsFormsApp1.Forms
             studentsForm.ShowDialog();
         }
 
-        private void btnEnterGrades_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("Chức năng nhập điểm tạm thời chưa khả dụng vì database chưa có bảng Diem.\n\nCần tạo bảng Diem trong database trước.", 
-                "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            
-            // TODO: Uncomment khi có bảng Diem
-            /*
-            if (dgvMyCourses.SelectedRows.Count == 0)
-            {
-                MessageBox.Show("Vui lòng chọn lớp học phần!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
 
-            string maLHP = dgvMyCourses.SelectedRows[0].Cells[0].Value.ToString();
-            var students = db.GetStudentsInSection(maLHP);
-
-            if (!students.Any())
-            {
-                MessageBox.Show("Lớp này chưa có sinh viên nào!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            Form gradesForm = new EnterGradesForm(maLHP, students);
-            if (gradesForm.ShowDialog() == DialogResult.OK)
-            {
-                MessageBox.Show("Nhập điểm thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            */
-        }
-
-        private void btnSchedule_Click(object sender, EventArgs e)
-        {
-            var sections = db.GetInstructorSections(currentInstructor.MaGV);
-            if (!sections.Any())
-            {
-                MessageBox.Show("Bạn chưa có lịch dạy nào!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            string schedule = "=== LỊCH DẠY CỦA BẠN ===\r\n\r\n";
-            foreach (var section in sections)
-            {
-                schedule += $"{section.TenHocPhan} - Lớp {section.TenLop}\r\n";
-                schedule += $"Lịch học: {section.LichHoc}\r\n\r\n";
-            }
-
-            MessageBox.Show(schedule, "Lịch dạy", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
 
         private void btnLogout_Click(object sender, EventArgs e)
         {
@@ -373,6 +523,42 @@ namespace WindowsFormsApp1.Forms
         private void txtInstructorInfo_TextChanged(object sender, EventArgs e)
         {
 
+        }
+        
+        // Cố gắng tìm logo ở nhiều vị trí thường gặp
+        private string ResolveLogoPath()
+        {
+            // Danh sách tên/đuôi có thể
+            var candidateNames = new[] { "neu.png", "logo.png", "neu.jpg", "logo.jpg", "neu.ico", "logo.ico" };
+            
+            // 1) bin/Debug|Release/Resources
+            var startup = Application.StartupPath;
+            foreach (var name in candidateNames)
+            {
+                var p = Path.Combine(startup, "Resources", name);
+                if (File.Exists(p)) return p;
+            }
+            
+            // 2) Thư mục dự án (2 cấp lên từ bin): projectRoot/Resources
+            try
+            {
+                var projectRoot = Path.GetFullPath(Path.Combine(startup, "..", ".."));
+                foreach (var name in candidateNames)
+                {
+                    var p = Path.Combine(projectRoot, "Resources", name);
+                    if (File.Exists(p)) return p;
+                }
+            }
+            catch { }
+            
+            // 3) Cùng thư mục chạy
+            foreach (var name in candidateNames)
+            {
+                var p = Path.Combine(startup, name);
+                if (File.Exists(p)) return p;
+            }
+            
+            return string.Empty;
         }
     }
 }

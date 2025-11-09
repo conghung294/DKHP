@@ -189,7 +189,6 @@ namespace WindowsFormsApp1.Forms
             tabControl.Parent = contentPanel;
             btnRegister.Parent = contentPanel;
             btnCancel.Parent = contentPanel;
-            btnSchedule.Parent = contentPanel;
             btnLogout.Parent = contentPanel;
             
             // Điều chỉnh vị trí controls trong contentPanel (padding đã được set ở Panel level)
@@ -303,14 +302,11 @@ namespace WindowsFormsApp1.Forms
             // Buttons ở dưới cùng
             btnRegister.Location = new Point(0, contentPanel.Height - 60);
             btnCancel.Location = new Point(160, contentPanel.Height - 60);
-            btnSchedule.Location = new Point(320, contentPanel.Height - 60);
             btnRegister.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             btnCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            btnSchedule.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             btnLogout.Visible = false; // Ẩn button logout cũ, dùng button trong sidebar
             btnRegister.Visible = true;
             btnCancel.Visible = true;
-            btnSchedule.Visible = true;
             
             // Đảm bảo TabControl và DataGridViews visible và hiển thị đúng
             tabControl.Visible = true;
@@ -365,7 +361,6 @@ namespace WindowsFormsApp1.Forms
             tabControl.BringToFront();
             btnRegister.BringToFront();
             btnCancel.BringToFront();
-            btnSchedule.BringToFront();
             
             // QUAN TRỌNG: Đảm bảo DataGridViews vẫn ở trong TabPages
             // Kiểm tra xem DataGridViews có đang trong TabPages không
@@ -500,13 +495,11 @@ namespace WindowsFormsApp1.Forms
                 {
                     btnRegister.Location = new Point(0, contentPanel.ClientSize.Height - 60);
                     btnCancel.Location = new Point(160, contentPanel.ClientSize.Height - 60);
-                    btnSchedule.Location = new Point(320, contentPanel.ClientSize.Height - 60);
                 }
                 
                 // Đảm bảo nút không bị che
                 btnRegister?.BringToFront();
                 btnCancel?.BringToFront();
-                btnSchedule?.BringToFront();
             }
         }
         
@@ -823,7 +816,6 @@ namespace WindowsFormsApp1.Forms
             // Style cho buttons
             ThemeHelper.ApplyButtonStyle(btnRegister, ThemeHelper.SuccessGreen, Color.White);
             ThemeHelper.ApplyButtonStyle(btnCancel, ThemeHelper.DangerRed, Color.White);
-            ThemeHelper.ApplyButtonStyle(btnSchedule, ThemeHelper.PrimaryBlue, Color.White);
             
             // Style cho TabControl
             tabControl.Font = ThemeHelper.NormalFont;
@@ -1016,25 +1008,6 @@ namespace WindowsFormsApp1.Forms
             }
         }
 
-        private void btnSchedule_Click(object sender, EventArgs e)
-        {
-            var registeredSections = db.GetRegisteredSections(currentStudent.MaSV);
-            if (!registeredSections.Any())
-            {
-                MessageBox.Show("Bạn chưa đăng ký lớp học phần nào!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            string schedule = "=== LỊCH HỌC CỦA BẠN ===\r\n\r\n";
-            foreach (var section in registeredSections)
-            {
-                schedule += $"{section.TenHocPhan} - Lớp {section.TenLop}\r\n";
-                schedule += $"Lịch học: {section.LichHoc}\r\n";
-                schedule += $"Giảng viên: {section.TenGiangVien}\r\n\r\n";
-            }
-
-            MessageBox.Show(schedule, "Lịch học", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
 
         private void btnLogout_Click(object sender, EventArgs e)
         {

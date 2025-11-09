@@ -13,10 +13,9 @@ namespace WindowsFormsApp1.Models
         public string DiaChi { get; set; }
         public string MaCTDT { get; set; }
         
-        // Thuộc tính tính toán (không có trong DB)
-        public string Password { get; set; } // Tạm thời dùng cho authentication
+
+        public string Password { get; set; }
         
-        // Thuộc tính tính toán
         public string TenCTDT { get; set; }
     }
 }

@@ -16,10 +16,6 @@ namespace WindowsFormsApp1
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             
-            // Test connection trước khi mở form chính (optional)
-            // Uncomment dòng dưới nếu muốn test connection khi khởi động
-            // TestConnectionOnStartup();
-            
             Application.Run(new LoginForm());
         }
 

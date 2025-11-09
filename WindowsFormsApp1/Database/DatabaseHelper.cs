@@ -1208,22 +1208,6 @@ namespace WindowsFormsApp1.Database
             return students;
         }
 
-        // Get student grades - Lưu ý: Schema không có bảng Diem, tạm thời trả về empty list
-        public List<Grade> GetStudentGrades(string maSV)
-        {
-            // TODO: Tạo bảng Diem hoặc xử lý điểm theo cách khác
-            // Tạm thời trả về empty list vì schema không có bảng Diem
-            return new List<Grade>();
-        }
-
-        // Save grades - Lưu ý: Schema không có bảng Diem
-        public bool SaveGrades(string maSV, string maLHP, double? diemCC, double? diemGK, double? diemThi)
-        {
-            // TODO: Cần tạo bảng Diem hoặc xử lý điểm theo cách khác
-            MessageBox.Show("Chức năng nhập điểm tạm thời chưa khả dụng.\n\nCần tạo bảng Diem trong database.", 
-                "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            return false;
-        }
 
         // Get program name
         public string GetProgramName(string maCTDT)
