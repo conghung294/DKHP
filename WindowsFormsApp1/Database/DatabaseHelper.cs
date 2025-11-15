@@ -747,7 +747,7 @@ namespace WindowsFormsApp1.Database
                     connection.Open();
                     string sql = @"
                         SELECT l.MaLHP, l.TenLop, l.MaHP, l.MaGV, l.SiSo, l.LichHoc,
-                               m.TenHocPhan, g.TenGV, d.HinhThuc,
+                               m.TenHocPhan, m.SoTC, g.TenGV, d.HinhThuc,
                                (SELECT COUNT(*) FROM DangKi d2 WHERE d2.MaLHP = l.MaLHP) as SoLuongDangKy
                         FROM LopHocPhan l
                         JOIN MonHoc m ON l.MaHP = m.MaMH
@@ -773,7 +773,8 @@ namespace WindowsFormsApp1.Database
                                     SoLuongDangKy = Convert.ToInt32(reader["SoLuongDangKy"]),
                                     TenHocPhan = reader["TenHocPhan"].ToString(),
                                     TenGiangVien = reader["TenGV"].ToString(),
-                                    HinhThuc = reader["HinhThuc"]?.ToString() ?? "Kế hoạch"
+                                    HinhThuc = reader["HinhThuc"]?.ToString() ?? "Kế hoạch",
+                                    SoTC = Convert.ToInt32(reader["SoTC"])
                                 });
                             }
                         }
@@ -1230,6 +1231,52 @@ namespace WindowsFormsApp1.Database
             {
                 return "";
             }
+        }
+
+        // Get section info by MaLHP
+        public CourseSection GetSectionInfo(string maLHP)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string sql = @"
+                        SELECT l.MaLHP, l.TenLop, l.MaHP, l.MaGV, l.SiSo, l.LichHoc,
+                               m.TenHocPhan, g.TenGV
+                        FROM LopHocPhan l
+                        JOIN MonHoc m ON l.MaHP = m.MaMH
+                        JOIN GiangVien g ON l.MaGV = g.MaGV
+                        WHERE l.MaLHP = @MaLHP";
+                    
+                    using (var command = new SqlCommand(sql, connection))
+                    {
+                        command.Parameters.AddWithValue("@MaLHP", maLHP);
+                        using (var reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                return new CourseSection
+                                {
+                                    MaLHP = reader["MaLHP"].ToString(),
+                                    TenLop = reader["TenLop"].ToString(),
+                                    MaHP = reader["MaHP"].ToString(),
+                                    MaGV = reader["MaGV"].ToString(),
+                                    SiSo = Convert.ToInt32(reader["SiSo"]),
+                                    LichHoc = reader["LichHoc"]?.ToString(),
+                                    TenHocPhan = reader["TenHocPhan"].ToString(),
+                                    TenGiangVien = reader["TenGV"].ToString()
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi load thông tin lớp: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            return null;
         }
 
         // Get department name

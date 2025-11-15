@@ -15,6 +15,7 @@ namespace WindowsFormsApp1.Forms
         private System.Windows.Forms.TabPage tabAvailable;
         private System.Windows.Forms.Label lblRegisteredTitle;
         private System.Windows.Forms.Label lblAvailableTitle;
+        private System.Windows.Forms.Button btnExportPDF;
 
         protected override void Dispose(bool disposing)
         {
@@ -78,8 +79,10 @@ namespace WindowsFormsApp1.Forms
             // 
             // tabRegistered
             // 
+            this.btnExportPDF = new System.Windows.Forms.Button();
             this.tabRegistered.Controls.Add(this.lblRegisteredTitle);
             this.tabRegistered.Controls.Add(this.dgvRegisteredCourses);
+            this.tabRegistered.Controls.Add(this.btnExportPDF);
             this.tabRegistered.Location = new System.Drawing.Point(4, 25);
             this.tabRegistered.Name = "tabRegistered";
             this.tabRegistered.Padding = new System.Windows.Forms.Padding(3);
@@ -116,6 +119,18 @@ namespace WindowsFormsApp1.Forms
             this.dgvRegisteredCourses.Columns.Add("LichHoc", "Lịch học");
             this.dgvRegisteredCourses.Columns.Add("LoaiMon", "Loại môn");
             this.dgvRegisteredCourses.Columns.Add("SiSo", "Sĩ số");
+            // 
+            // btnExportPDF
+            // 
+            this.btnExportPDF.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
+            this.btnExportPDF.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnExportPDF.ForeColor = System.Drawing.Color.White;
+            this.btnExportPDF.Location = new System.Drawing.Point(10, 420);
+            this.btnExportPDF.Name = "btnExportPDF";
+            this.btnExportPDF.Size = new System.Drawing.Size(150, 35);
+            this.btnExportPDF.TabIndex = 2;
+            this.btnExportPDF.Text = "📄 Xuất PDF";
+            this.btnExportPDF.UseVisualStyleBackColor = false;
             // 
             // tabAvailable
             // 

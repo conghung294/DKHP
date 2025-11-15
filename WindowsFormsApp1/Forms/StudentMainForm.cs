@@ -4,6 +4,8 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using System.IO;
+using System.Diagnostics;
+using System.Drawing.Printing;
 using WindowsFormsApp1.Database;
 using WindowsFormsApp1.Models;
 using WindowsFormsApp1.UI;
@@ -190,6 +192,7 @@ namespace WindowsFormsApp1.Forms
             btnRegister.Parent = contentPanel;
             btnCancel.Parent = contentPanel;
             btnLogout.Parent = contentPanel;
+            btnExportPDF.Parent = tabRegistered;
             
             // Điều chỉnh vị trí controls trong contentPanel (padding đã được set ở Panel level)
             // Vị trí tính từ padding của Panel (25px)
@@ -378,6 +381,11 @@ namespace WindowsFormsApp1.Forms
             {
                 tabRegistered.Controls.Add(lblRegisteredTitle);
             }
+            if (!tabRegistered.Controls.Contains(btnExportPDF))
+            {
+                tabRegistered.Controls.Add(btnExportPDF);
+            }
+            btnExportPDF.Click += btnExportPDF_Click;
             if (!tabAvailable.Controls.Contains(lblAvailableTitle))
             {
                 tabAvailable.Controls.Add(lblAvailableTitle);
@@ -571,10 +579,19 @@ namespace WindowsFormsApp1.Forms
                 dgvRegisteredCourses.Location = new Point(10, 45);
                 dgvRegisteredCourses.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
                 
-                // Tính toán kích thước dựa trên ClientSize của TabPage (đã trừ tab header)
+                // Tính toán kích thước dựa trên ClientSize của TabPage (đã trừ tab header và nút)
                 int availableWidth = Math.Max(100, tabRegistered.ClientSize.Width - 20);
-                int availableHeight = Math.Max(100, tabRegistered.ClientSize.Height - 55);
+                int buttonAreaHeight = 50; // Chừa chỗ cho nút
+                int availableHeight = Math.Max(100, tabRegistered.ClientSize.Height - 55 - buttonAreaHeight);
                 dgvRegisteredCourses.Size = new Size(availableWidth, availableHeight);
+                
+                // Đặt nút xuất PDF
+                if (btnExportPDF != null)
+                {
+                    btnExportPDF.Location = new Point(10, dgvRegisteredCourses.Bottom + 10);
+                    btnExportPDF.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+                    btnExportPDF.BringToFront();
+                }
                 
                 dgvRegisteredCourses.Visible = true;
                 dgvRegisteredCourses.Enabled = true;
@@ -719,6 +736,7 @@ namespace WindowsFormsApp1.Forms
             // Style cho buttons
             ThemeHelper.ApplyButtonStyle(btnRegister, ThemeHelper.SuccessGreen, Color.White);
             ThemeHelper.ApplyButtonStyle(btnCancel, ThemeHelper.DangerRed, Color.White);
+            ThemeHelper.ApplyButtonStyle(btnExportPDF, Color.FromArgb(0, 123, 255), Color.White);
             
             // Style cho TabControl
             tabControl.Font = ThemeHelper.NormalFont;
@@ -924,6 +942,297 @@ namespace WindowsFormsApp1.Forms
                 }
             }
             this.Close();
+        }
+
+        private void btnExportPDF_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var registeredSections = db.GetRegisteredSections(currentStudent.MaSV);
+                
+                if (registeredSections.Count == 0)
+                {
+                    MessageBox.Show("Bạn chưa đăng ký học phần nào!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                SaveFileDialog saveDialog = new SaveFileDialog();
+                saveDialog.Filter = "PDF files (*.pdf)|*.pdf";
+                saveDialog.FileName = $"DanhSachHocPhan_{currentStudent.MaSV}_{DateTime.Now:yyyyMMdd}.pdf";
+                
+                if (saveDialog.ShowDialog() == DialogResult.OK)
+                {
+                    ExportRegisteredCoursesToPdf(registeredSections, saveDialog.FileName);
+                    MessageBox.Show("Xuất PDF thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi xuất PDF: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void ExportRegisteredCoursesToPdf(List<CourseSection> sections, string filePath)
+        {
+            // Tạo file HTML với bảng danh sách học phần
+            string htmlContent = GenerateHtmlReport(sections);
+            string htmlPath = Path.ChangeExtension(filePath, ".html");
+            File.WriteAllText(htmlPath, htmlContent, System.Text.Encoding.UTF8);
+        }
+
+        private string GenerateHtmlReport(List<CourseSection> sections)
+        {
+            string tenCTDT = db.GetProgramName(currentStudent.MaCTDT);
+            int tongTC = sections.Sum(s => s.SoTC);
+            
+            string html = $@"<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='UTF-8'>
+    <title>Danh sách học phần đã đăng ký</title>
+    <style>
+        body {{ font-family: 'Times New Roman', serif; margin: 20px; }}
+        .header {{ text-align: center; margin-bottom: 30px; }}
+        .header h1 {{ margin: 0; font-size: 18px; font-weight: bold; }}
+        .header h2 {{ margin: 5px 0; font-size: 16px; }}
+        .info {{ margin-bottom: 20px; }}
+        .info table {{ width: 100%; border-collapse: collapse; }}
+        .info td {{ padding: 5px; }}
+        .info td:first-child {{ font-weight: bold; width: 150px; }}
+        table {{ width: 100%; border-collapse: collapse; margin-top: 20px; }}
+        th, td {{ border: 1px solid #000; padding: 8px; text-align: left; }}
+        th {{ background-color: #f0f0f0; font-weight: bold; }}
+        .footer {{ margin-top: 30px; text-align: right; }}
+        .total {{ font-weight: bold; }}
+    </style>
+</head>
+<body>
+    <div class='header'>
+        <h1>TRƯỜNG ĐẠI HỌC KINH TẾ QUỐC DÂN</h1>
+        <h2>DANH SÁCH HỌC PHẦN ĐÃ ĐĂNG KÝ</h2>
+    </div>
+    
+    <div class='info'>
+        <table>
+            <tr>
+                <td>Mã sinh viên:</td>
+                <td>{currentStudent.MaSV}</td>
+                <td>Họ và tên:</td>
+                <td>{currentStudent.TenSV}</td>
+            </tr>
+            <tr>
+                <td>Chương trình đào tạo:</td>
+                <td>{tenCTDT}</td>
+                <td>Ngày xuất:</td>
+                <td>{DateTime.Now:dd/MM/yyyy HH:mm}</td>
+            </tr>
+        </table>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>STT</th>
+                <th>Mã lớp HP</th>
+                <th>Tên học phần</th>
+                <th>Lớp</th>
+                <th>Số TC</th>
+                <th>Lịch học</th>
+                <th>Giảng viên</th>
+                <th>Hình thức</th>
+            </tr>
+        </thead>
+        <tbody>";
+            
+            int stt = 1;
+            foreach (var section in sections)
+            {
+                html += $@"
+            <tr>
+                <td>{stt++}</td>
+                <td>{section.MaLHP}</td>
+                <td>{section.TenHocPhan}</td>
+                <td>{section.TenLop}</td>
+                <td>{section.SoTC}</td>
+                <td>{section.LichHoc ?? ""}</td>
+                <td>{section.TenGiangVien}</td>
+                <td>{section.HinhThuc ?? "Kế hoạch"}</td>
+            </tr>";
+            }
+            
+            html += $@"
+            <tr class='total'>
+                <td colspan='4' style='text-align: right;'><strong>Tổng số tín chỉ:</strong></td>
+                <td><strong>{tongTC}</strong></td>
+                <td colspan='3'></td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class='footer'>
+        <p>Hà Nội, ngày {DateTime.Now:dd} tháng {DateTime.Now:MM} năm {DateTime.Now:yyyy}</p>
+        <p style='margin-top: 50px;'><strong>Người lập</strong></p>
+        <p style='margin-top: 30px;'><strong>{currentStudent.TenSV}</strong></p>
+    </div>
+</body>
+</html>";
+            
+            return html;
+        }
+
+
+        private void CreatePdfUsingPrintDocument(List<CourseSection> sections, string pdfPath)
+        {
+            // Sử dụng PrintDocument để tạo PDF
+            // Cần Microsoft Print to PDF được cài đặt trên Windows
+            
+            using (PrintDocument printDoc = new PrintDocument())
+            {
+                printDoc.PrinterSettings.PrinterName = "Microsoft Print to PDF";
+                printDoc.PrinterSettings.PrintToFile = true;
+                printDoc.PrinterSettings.PrintFileName = pdfPath;
+                
+                printDoc.PrintPage += (sender, e) =>
+                {
+                    DrawReportPage(sections, e);
+                };
+                
+                printDoc.Print();
+            }
+        }
+
+        private void DrawReportPage(List<CourseSection> sections, System.Drawing.Printing.PrintPageEventArgs e)
+        {
+            // Vẽ nội dung báo cáo lên trang in
+            float yPos = 0;
+            float leftMargin = e.MarginBounds.Left;
+            float topMargin = e.MarginBounds.Top;
+            float rightMargin = e.MarginBounds.Right;
+            float bottomMargin = e.MarginBounds.Bottom;
+            
+            Font titleFont = new Font("Times New Roman", 16, FontStyle.Bold);
+            Font headerFont = new Font("Times New Roman", 14, FontStyle.Bold);
+            Font normalFont = new Font("Times New Roman", 10);
+            Font tableFont = new Font("Times New Roman", 9);
+            
+            // Tiêu đề
+            string title = "TRƯỜNG ĐẠI HỌC KINH TẾ QUỐC DÂN";
+            string subtitle = "DANH SÁCH HỌC PHẦN ĐÃ ĐĂNG KÝ";
+            
+            SizeF titleSize = e.Graphics.MeasureString(title, titleFont);
+            e.Graphics.DrawString(title, titleFont, Brushes.Black, 
+                leftMargin + (e.MarginBounds.Width - titleSize.Width) / 2, yPos + topMargin);
+            yPos += titleSize.Height + 10;
+            
+            SizeF subtitleSize = e.Graphics.MeasureString(subtitle, headerFont);
+            e.Graphics.DrawString(subtitle, headerFont, Brushes.Black,
+                leftMargin + (e.MarginBounds.Width - subtitleSize.Width) / 2, yPos + topMargin);
+            yPos += subtitleSize.Height + 20;
+            
+            // Thông tin sinh viên
+            string tenCTDT = db.GetProgramName(currentStudent.MaCTDT);
+            string info1 = $"Mã sinh viên: {currentStudent.MaSV}";
+            string info2 = $"Họ và tên: {currentStudent.TenSV}";
+            string info3 = $"Chương trình: {tenCTDT}";
+            string info4 = $"Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm}";
+            
+            e.Graphics.DrawString(info1, normalFont, Brushes.Black, leftMargin, yPos + topMargin);
+            yPos += normalFont.Height + 5;
+            e.Graphics.DrawString(info2, normalFont, Brushes.Black, leftMargin, yPos + topMargin);
+            yPos += normalFont.Height + 5;
+            e.Graphics.DrawString(info3, normalFont, Brushes.Black, leftMargin, yPos + topMargin);
+            yPos += normalFont.Height + 5;
+            e.Graphics.DrawString(info4, normalFont, Brushes.Black, leftMargin, yPos + topMargin);
+            yPos += normalFont.Height + 15;
+            
+            // Vẽ bảng
+            float tableWidth = e.MarginBounds.Width;
+            float colWidth = tableWidth / 8;
+            float rowHeight = tableFont.Height + 4;
+            
+            // Header
+            string[] headers = { "STT", "Mã lớp HP", "Tên học phần", "Lớp", "Số TC", "Lịch học", "Giảng viên", "Hình thức" };
+            float xPos = leftMargin;
+            for (int i = 0; i < headers.Length; i++)
+            {
+                RectangleF cellRect = new RectangleF(xPos, yPos + topMargin, colWidth, rowHeight);
+                e.Graphics.DrawRectangle(Pens.Black, cellRect.X, cellRect.Y, cellRect.Width, cellRect.Height);
+                e.Graphics.DrawString(headers[i], tableFont, Brushes.Black, cellRect, 
+                    new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
+                xPos += colWidth;
+            }
+            yPos += rowHeight;
+            
+            // Dữ liệu
+            int stt = 1;
+            int tongTC = 0;
+            foreach (var section in sections)
+            {
+                if (yPos + topMargin + rowHeight > bottomMargin)
+                {
+                    e.HasMorePages = true;
+                    return;
+                }
+                
+                xPos = leftMargin;
+                string[] rowData = {
+                    stt++.ToString(),
+                    section.MaLHP,
+                    section.TenHocPhan,
+                    section.TenLop,
+                    section.SoTC.ToString(),
+                    section.LichHoc ?? "",
+                    section.TenGiangVien,
+                    section.HinhThuc ?? "Kế hoạch"
+                };
+                
+                tongTC += section.SoTC;
+                
+                for (int i = 0; i < rowData.Length; i++)
+                {
+                    RectangleF cellRect = new RectangleF(xPos, yPos + topMargin, colWidth, rowHeight);
+                    e.Graphics.DrawRectangle(Pens.Black, cellRect.X, cellRect.Y, cellRect.Width, cellRect.Height);
+                    
+                    StringFormat format = new StringFormat();
+                    if (i == 0 || i == 4) // STT và Số TC căn giữa
+                        format.Alignment = StringAlignment.Center;
+                    else
+                        format.Alignment = StringAlignment.Near;
+                    format.LineAlignment = StringAlignment.Center;
+                    format.Trimming = StringTrimming.EllipsisCharacter;
+                    
+                    e.Graphics.DrawString(rowData[i], tableFont, Brushes.Black, cellRect, format);
+                    xPos += colWidth;
+                }
+                yPos += rowHeight;
+            }
+            
+            // Tổng số tín chỉ
+            yPos += 5;
+            xPos = leftMargin;
+            RectangleF totalRect = new RectangleF(xPos, yPos + topMargin, colWidth * 4, rowHeight);
+            e.Graphics.DrawRectangle(Pens.Black, totalRect.X, totalRect.Y, totalRect.Width, totalRect.Height);
+            e.Graphics.DrawString("Tổng số tín chỉ:", tableFont, Brushes.Black, totalRect,
+                new StringFormat { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center });
+            
+            xPos += colWidth * 4;
+            RectangleF totalValueRect = new RectangleF(xPos, yPos + topMargin, colWidth, rowHeight);
+            e.Graphics.DrawRectangle(Pens.Black, totalValueRect.X, totalValueRect.Y, totalValueRect.Width, totalValueRect.Height);
+            e.Graphics.DrawString(tongTC.ToString(), tableFont, Brushes.Black, totalValueRect,
+                new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
+            
+            // Footer
+            yPos += rowHeight + 30;
+            string footer1 = $"Hà Nội, ngày {DateTime.Now:dd} tháng {DateTime.Now:MM} năm {DateTime.Now:yyyy}";
+            e.Graphics.DrawString(footer1, normalFont, Brushes.Black, rightMargin - 200, yPos + topMargin);
+            
+            yPos += normalFont.Height + 20;
+            e.Graphics.DrawString("Người lập", normalFont, Brushes.Black, rightMargin - 200, yPos + topMargin);
+            
+            yPos += normalFont.Height + 30;
+            e.Graphics.DrawString(currentStudent.TenSV, normalFont, Brushes.Black, rightMargin - 200, yPos + topMargin);
+            
+            e.HasMorePages = false;
         }
     }
 }

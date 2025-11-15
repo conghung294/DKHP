@@ -16,6 +16,7 @@ namespace WindowsFormsApp1.Models
         public string TenHocPhan { get; set; }
         public string TenGiangVien { get; set; }
         public string HinhThuc { get; set; } // Hình thức đăng ký: "Kế hoạch" hoặc "Học vượt"
+        public int SoTC { get; set; } // Số tín chỉ
         public int SoChoTrong => SiSo - SoLuongDangKy;
         public bool DaDaySinhVien => SoLuongDangKy >= SiSo;
     }
