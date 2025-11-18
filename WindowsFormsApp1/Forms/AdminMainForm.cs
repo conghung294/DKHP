@@ -14,6 +14,7 @@ namespace WindowsFormsApp1.Forms
         private Panel contentPanel;
         private Label lblTitle;
         private Button btnLogout;
+        private Button btnHelp;
         private TabControl tabControl;
         private TabPage tabStudents;
         private TabPage tabInstructors;
@@ -62,8 +63,10 @@ namespace WindowsFormsApp1.Forms
             headerPanel = new Panel { Height = 56, Dock = DockStyle.Top, BackColor = ThemeHelper.HeaderBlue };
             lblTitle = new Label { Text = "Quản trị hệ thống - " + adminName, AutoSize = true, ForeColor = Color.White, Location = new Point(16, 16), Font = ThemeHelper.HeaderFont };
             btnLogout = new Button { Text = "Đăng xuất", Anchor = AnchorStyles.Top | AnchorStyles.Right, Size = new Size(110, 32) };
+            btnHelp = new Button { Text = "Help", Anchor = AnchorStyles.Top | AnchorStyles.Right, Size = new Size(80, 32) };
             headerPanel.Controls.Add(lblTitle);
             headerPanel.Controls.Add(btnLogout);
+            headerPanel.Controls.Add(btnHelp);
 
             sidebarPanel = new Panel { Width = 220, Dock = DockStyle.Left, BackColor = ThemeHelper.SidebarBackground };
 
@@ -170,6 +173,7 @@ namespace WindowsFormsApp1.Forms
             ThemeHelper.ApplyButtonStyle(btnLogout, ThemeHelper.DangerRed, Color.White, 6);
             ThemeHelper.ApplyDataGridViewStyle(dgvStudents);
             ThemeHelper.ApplyDataGridViewStyle(dgvInstructors);
+            ThemeHelper.ApplyButtonStyle(btnHelp, ThemeHelper.PrimaryBlue, Color.White, 6);
             ThemeHelper.ApplyButtonStyle(btnNavStudents, ThemeHelper.SidebarActive, Color.White, 6);
             ThemeHelper.ApplyButtonStyle(btnNavInstructors, ThemeHelper.PrimaryBlue, Color.White, 6);
             ThemeHelper.ApplyDataGridViewStyle(dgvCourses);
@@ -183,13 +187,8 @@ namespace WindowsFormsApp1.Forms
         private void BindEvents()
         {
             // Căn phải nút Đăng xuất trong header như màn sinh viên
-            headerPanel.Resize += (s, e) =>
-            {
-                btnLogout.Location = new Point(headerPanel.Width - btnLogout.Width - 16, 12);
-            };
-            // Gọi một lần để đặt vị trí ban đầu
-            headerPanel.PerformLayout();
-            btnLogout.Location = new Point(headerPanel.Width - btnLogout.Width - 16, 12);
+            headerPanel.Resize += (s, e) => LayoutHeaderButtons();
+            LayoutHeaderButtons();
 
             btnLogout.Click += (s, e) =>
             {
@@ -204,6 +203,7 @@ namespace WindowsFormsApp1.Forms
                 }
                 this.Close();
             };
+            btnHelp.Click += (s, e) => HelpLauncher.ShowHelp(this);
 
             btnNavStudents.Click += (s, e) =>
             {
@@ -595,6 +595,15 @@ namespace WindowsFormsApp1.Forms
             dgvDepartments.Columns.Clear();
             dgvDepartments.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "MaKhoa", DataPropertyName = "MaKhoa" });
             dgvDepartments.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "TenKhoa", DataPropertyName = "TenKhoa" });
+        }
+
+        private void LayoutHeaderButtons()
+        {
+            if (headerPanel == null || btnLogout == null || btnHelp == null) return;
+
+            int padding = 16;
+            btnLogout.Location = new Point(headerPanel.Width - btnLogout.Width - padding, 12);
+            btnHelp.Location = new Point(btnLogout.Left - btnHelp.Width - 10, 12);
         }
     }
 }

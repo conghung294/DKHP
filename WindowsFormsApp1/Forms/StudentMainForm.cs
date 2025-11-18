@@ -23,6 +23,7 @@ namespace WindowsFormsApp1.Forms
         private Label lblHeaderTitle;
         private Button btnHome;
         private Button btnCourses;
+        private Button btnHelp;
         private Label lblUserInfo;
         
         // Card thông tin sinh viên (UI đẹp hơn thay cho txtStudentInfo)
@@ -74,7 +75,7 @@ namespace WindowsFormsApp1.Forms
             headerPanel.Height = 60;
             headerPanel.BackColor = ThemeHelper.HeaderBlue;
             headerPanel.Padding = new Padding(0);
-            
+
             lblHeaderTitle = new Label();
             lblHeaderTitle.Text = "HỆ THỐNG ĐĂNG KÝ HỌC TÍN CHỈ";
             lblHeaderTitle.Font = ThemeHelper.HeaderFont;
@@ -84,8 +85,17 @@ namespace WindowsFormsApp1.Forms
             lblHeaderTitle.Height = 60;
             lblHeaderTitle.TextAlign = ContentAlignment.MiddleLeft;
             lblHeaderTitle.Padding = new Padding(0);
-            
+
+            btnHelp = new Button();
+            btnHelp.Text = "Help";
+            btnHelp.Size = new Size(90, 32);
+            btnHelp.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnHelp.Click += (s, e) => HelpLauncher.ShowHelp(this);
+
             headerPanel.Controls.Add(lblHeaderTitle);
+            headerPanel.Controls.Add(btnHelp);
+            headerPanel.Resize += (s, e) => LayoutHelpButton();
+            LayoutHelpButton();
             
             // Sidebar
             sidebarPanel = new Panel();
@@ -502,6 +512,14 @@ namespace WindowsFormsApp1.Forms
                 btnCancel?.BringToFront();
             }
         }
+
+        private void LayoutHelpButton()
+        {
+            if (headerPanel == null || btnHelp == null) return;
+            int padding = 16;
+            int top = (headerPanel.Height - btnHelp.Height) / 2;
+            btnHelp.Location = new Point(headerPanel.Width - btnHelp.Width - padding, Math.Max(12, top));
+        }
         
         private void StudentMainForm_ResizeEnd(object sender, EventArgs e)
         {
@@ -737,6 +755,7 @@ namespace WindowsFormsApp1.Forms
             ThemeHelper.ApplyButtonStyle(btnRegister, ThemeHelper.SuccessGreen, Color.White);
             ThemeHelper.ApplyButtonStyle(btnCancel, ThemeHelper.DangerRed, Color.White);
             ThemeHelper.ApplyButtonStyle(btnExportPDF, Color.FromArgb(0, 123, 255), Color.White);
+            ThemeHelper.ApplyButtonStyle(btnHelp, ThemeHelper.BackgroundWhite, ThemeHelper.PrimaryBlueDark);
             
             // Style cho TabControl
             tabControl.Font = ThemeHelper.NormalFont;
