@@ -1,9 +1,11 @@
 using System;
 using System.Data;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using WindowsFormsApp1.Database;
 using WindowsFormsApp1.UI;
+using WindowsFormsApp1.Models;
 
 namespace WindowsFormsApp1.Forms
 {
@@ -37,6 +39,10 @@ namespace WindowsFormsApp1.Forms
         private Button btnNavSections;
         private Button btnNavDepartments;
         private PictureBox picLogo;
+
+        // Dữ liệu và control tìm kiếm sinh viên
+        private List<Student> allStudents;
+        private ToolStripTextBox txtStudentSearch;
 
         private readonly string adminName;
 
@@ -105,6 +111,12 @@ namespace WindowsFormsApp1.Forms
             studentsToolbar.Items.Add(new ToolStripButton("Xóa") { Tag = "delete" });
             studentsToolbar.Items.Add(new ToolStripSeparator());
             studentsToolbar.Items.Add(new ToolStripButton("Tải lại") { Tag = "refresh" });
+            studentsToolbar.Items.Add(new ToolStripSeparator());
+            studentsToolbar.Items.Add(new ToolStripLabel("Mã SV:"));
+            txtStudentSearch = new ToolStripTextBox { AutoSize = false, Width = 120, ToolTipText = "Nhập Mã SV rồi Enter" };
+            studentsToolbar.Items.Add(txtStudentSearch);
+            var btnStudentSearch = new ToolStripButton("Tìm") { Tag = "search" };
+            studentsToolbar.Items.Add(btnStudentSearch);
             dgvStudents = new DataGridView { Dock = DockStyle.Fill, ReadOnly = true, AllowUserToAddRows = false, AllowUserToDeleteRows = false, SelectionMode = DataGridViewSelectionMode.FullRowSelect, MultiSelect = false, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill };
             tabStudents.Controls.Add(dgvStudents);
             tabStudents.Controls.Add(studentsToolbar);
@@ -274,6 +286,9 @@ namespace WindowsFormsApp1.Forms
                         break;
                     case "refresh":
                         LoadStudents();
+                        break;
+                    case "search":
+                        ApplyStudentSearch();
                         break;
                     default:
                         MessageBox.Show("Chức năng sẽ được bổ sung sau.");
@@ -466,8 +481,9 @@ namespace WindowsFormsApp1.Forms
         private void LoadStudents()
         {
             var data = DatabaseHelper.Instance.GetAllStudents();
+            allStudents = data;
             ConfigureStudentsGrid();
-            dgvStudents.DataSource = data;
+            dgvStudents.DataSource = allStudents;
         }
 
         private void LoadInstructors()
@@ -595,6 +611,35 @@ namespace WindowsFormsApp1.Forms
             dgvDepartments.Columns.Clear();
             dgvDepartments.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "MaKhoa", DataPropertyName = "MaKhoa" });
             dgvDepartments.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "TenKhoa", DataPropertyName = "TenKhoa" });
+        }
+
+        private void ApplyStudentSearch()
+        {
+            if (allStudents == null)
+            {
+                LoadStudents();
+            }
+
+            var keyword = txtStudentSearch?.Text.Trim() ?? string.Empty;
+
+            if (string.IsNullOrEmpty(keyword))
+            {
+                dgvStudents.DataSource = allStudents;
+                return;
+            }
+
+            // Tìm theo Mã SV (chứa chuỗi nhập vào)
+            var filtered = new List<Student>();
+            foreach (var s in allStudents)
+            {
+                if (!string.IsNullOrEmpty(s.MaSV) &&
+                    s.MaSV.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    filtered.Add(s);
+                }
+            }
+
+            dgvStudents.DataSource = filtered;
         }
 
         private void LayoutHeaderButtons()
